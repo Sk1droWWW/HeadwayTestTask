@@ -2,17 +2,14 @@ package com.example.headwayTestTask
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.headwayTestTask.ui.main.MainFragment
+import androidx.fragment.app.FragmentActivity
+import com.example.headwayTestTask.ui.LoginFragment
+import com.example.headwayTestTask.ui.MainFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, MainFragment.newInstance())
-                .commitNow()
-        }
     }
 }

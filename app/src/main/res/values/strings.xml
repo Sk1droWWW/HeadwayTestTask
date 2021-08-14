@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">HeadwayTestTask</string>
+    <string name="github_login_btn">Login via Github</string>
+    <string name="login_button_text">Login</string>
+    <string name="logout_button_text">Logout</string>
+    <string name="welcome_message">Hi </string>
 </resources>
