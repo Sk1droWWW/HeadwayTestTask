@@ -62,23 +62,26 @@ dependencies {
 
     // DataBinding
     implementation "androidx.databinding:databinding-runtime:$databinding_version"
-    implementation 'com.google.firebase:firebase-common-ktx:19.5.0'
     kapt "com.android.databinding:compiler:$databinding_version"
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation 'com.squareup.retrofit2:converter-gson:2.7.1' // Конвертер для работы с JSON
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1' // Перехватчик запросов
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1' // OkHttp - это HTTP-клиент
 
     // Firebase Auth
+    implementation 'com.google.firebase:firebase-common-ktx:19.5.0'
     implementation "com.firebaseui:firebase-ui-auth:5.0.0"
     implementation "com.firebaseui:firebase-ui-auth-github:5.0.0"
 
     // Paging
-    implementation "androidx.paging:paging-runtime:$paging_version" // For Kotlin use paging-runtime-ktx
+    implementation "androidx.paging:paging-runtime:$paging_version"
 
     // RxJava support
-    implementation "io.reactivex.rxjava2:rxjava:2.2.21"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.7.1'
     implementation "androidx.paging:paging-rxjava2:$paging_version"
 
-    // Github Api
-    implementation "org.kohsuke:github-api:$githubapi_version"
 }
