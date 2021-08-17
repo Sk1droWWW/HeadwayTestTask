@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.databinding.MainFragmentBinding
 import com.example.headwayTestTask.network.model.GitHubSearchModel
@@ -42,6 +43,10 @@ class MainFragment : Fragment() {
     //    private lateinit var viewModel: MainViewModel
     private lateinit var binding: MainFragmentBinding
 
+    // Adapter
+    private val searchAdapter: GitHubSearchAdapter
+            by lazy { GitHubSearchAdapter() }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -62,9 +67,8 @@ class MainFragment : Fragment() {
 
         // Get a reference to the ViewModel associated with this fragment.
         val mainFragmentViewModel = MainViewModel()
-
-        val adapter = GitHubSearchAdapter()
-        binding.searchResult.adapter = adapter
+        binding.searchResult.layoutManager = LinearLayoutManager(requireContext())
+        binding.searchResult.adapter = searchAdapter
         binding.loginButton.setOnClickListener { launchSignInFlow() }
         binding.searchButton.setOnClickListener {
             val apiService = GithubApiService.create()
@@ -74,13 +78,20 @@ class MainFragment : Fragment() {
                 .subscribeOn(Schedulers.io())
                 .subscribe ({
                         result ->
-                    Log.d("Result", "There are ${result.items?.size}")
                     Toast.makeText(requireContext(),
-                        "There are ${result.items?.size}", Toast.LENGTH_LONG).show()
+                        "There are ${result.items?.size?.toString()}",
+                        Toast.LENGTH_LONG).show()
+                    populateList(result)
                 }, { error ->
                     error.printStackTrace()
                 })
         }
+    }
+
+    private fun populateList(response: GitHubSearchModel?) {
+        val searchItemList = response?.items
+        searchAdapter.clearAll()
+        searchAdapter.addData(searchItemList)
     }
 
     private fun setRecyclerData(it: GitHubSearchModel?) {

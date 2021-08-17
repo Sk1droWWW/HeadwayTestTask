@@ -12,8 +12,9 @@ data class GitHubSearchItemModel (
         @SerializedName("html_url")         val htmlUrl : String,
         @SerializedName("created_at")       val createdAt : String,
         @SerializedName("updated_at")       val updatedAt : String,
-        @SerializedName("stargazers_count") val stars : Int ) {
-
+        @SerializedName("language")         val language : String,
+        @SerializedName("stargazers_count") val stargazers_count : String)
+{
     data class Owner (
             @SerializedName("id")               val id : Int,
             @SerializedName("login")            val loginName : String,

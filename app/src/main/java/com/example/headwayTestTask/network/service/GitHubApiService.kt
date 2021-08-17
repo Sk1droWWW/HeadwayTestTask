@@ -15,7 +15,7 @@ interface GithubApiService {
         @Query("q")         searchParam : String,
         @Query("sort")      sort : String = "stars",
         @Query("order")     order : String = "desc",
-        @Query("per_page")  perPage : Int = 15 ) : Observable<GitHubSearchModel>
+        @Query("per_page")  perPage : Int = 15) : Observable<GitHubSearchModel>
 
     /**
      * Companion object to create the GithubApiService
@@ -33,7 +33,7 @@ interface GithubApiService {
     }
 }
 
-class SearchRepository(val apiService: GithubApiService) {
+class SearchRepository(private val apiService: GithubApiService) {
     fun searchGitHubRepo(repoName: String): Observable<GitHubSearchModel> {
         return apiService.searchGitHubRepo(searchParam = repoName)
     }
