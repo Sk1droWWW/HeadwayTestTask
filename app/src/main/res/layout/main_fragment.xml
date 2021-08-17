@@ -6,8 +6,8 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
-            name="LoginViewModel"
-            type="com.example.headwayTestTask.viewmodels.LoginViewModel" />
+            name="MainViewModel"
+            type="com.example.headwayTestTask.viewmodels.MainViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

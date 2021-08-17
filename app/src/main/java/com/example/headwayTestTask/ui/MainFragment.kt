@@ -14,11 +14,17 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.databinding.MainFragmentBinding
-import com.example.headwayTestTask.viewmodels.LoginViewModel
+import com.example.headwayTestTask.network.model.GitHubSearchModel
+import com.example.headwayTestTask.network.service.GithubApiService
+import com.example.headwayTestTask.network.service.SearchRepositoryProvider
+import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
+import com.example.headwayTestTask.viewmodels.MainViewModel
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.OAuthProvider
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 
 class MainFragment : Fragment() {
@@ -31,10 +37,11 @@ class MainFragment : Fragment() {
     }
 
     // Get a reference to the ViewModel scoped to this Fragment
-    private val viewModel by viewModels<LoginViewModel>()
+    private val viewModel by viewModels<MainViewModel>()
 
-    //    private lateinit var viewModel: LoginViewModel
+    //    private lateinit var viewModel: MainViewModel
     private lateinit var binding: MainFragmentBinding
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -53,7 +60,32 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeAuthenticationState()
 
+        // Get a reference to the ViewModel associated with this fragment.
+        val mainFragmentViewModel = MainViewModel()
+
+        val adapter = GitHubSearchAdapter()
+        binding.searchResult.adapter = adapter
         binding.loginButton.setOnClickListener { launchSignInFlow() }
+        binding.searchButton.setOnClickListener {
+            val apiService = GithubApiService.create()
+            val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
+            repository.searchGitHubRepo(binding.searchEditText.text.toString())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe ({
+                        result ->
+                    Log.d("Result", "There are ${result.items?.size}")
+                    Toast.makeText(requireContext(),
+                        "There are ${result.items?.size}", Toast.LENGTH_LONG).show()
+                }, { error ->
+                    error.printStackTrace()
+                })
+        }
+    }
+
+    private fun setRecyclerData(it: GitHubSearchModel?) {
+        binding.searchResult.adapter = GitHubSearchAdapter()
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -84,7 +116,7 @@ class MainFragment : Fragment() {
 
         viewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
             when (authenticationState) {
-                LoginViewModel.AuthenticationState.AUTHENTICATED -> {
+                MainViewModel.AuthenticationState.AUTHENTICATED -> {
                     binding.welcomeText.text = getPersonalizationMessage()
 
                     binding.loginButton.text = getString(R.string.logout_button_text)
@@ -137,21 +169,5 @@ class MainFragment : Fragment() {
                 Toast.makeText(requireContext(), "nope", Toast.LENGTH_LONG).show()
             }
         }
-
-        /* val providers = arrayListOf(
- //            AuthUI.IdpConfig.EmailBuilder().build(),
-             AuthUI.IdpConfig.GitHubBuilder().build()
- //            OAuthProvider.newBuilder("github.com").build()
-             //
-         )*/
-
-        /* startActivityForResult(
-             AuthUI.getInstance()
-                 .createSignInIntentBuilder()
-                 .setAvailableProviders(providers)
-                 .setIsSmartLockEnabled(false)
-                 .build(),
-             MainFragment.SIGN_IN_RESULT_CODE
-         )*/
     }
 }
