@@ -7,6 +7,10 @@
         <variable
             name="item"
             type="com.example.headwayTestTask.network.model.GitHubSearchItemModel" />
+
+        <variable
+            name="repoItemClick"
+            type="com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter.GitHubSearchItemClickListener" />
     </data>
 
     <LinearLayout
@@ -14,7 +18,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="4dp"
-        android:layout_margin="8dp">
+        android:layout_margin="8dp"
+        android:onClick="@{() -> repoItemClick.onGitHubSearchItemClicked(item)}">
 
         <TextView
             android:id="@+id/repo_name"

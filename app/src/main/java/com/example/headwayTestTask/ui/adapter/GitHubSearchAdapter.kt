@@ -1,10 +1,12 @@
 package com.example.headwayTestTask.ui.adapter
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.LayoutRes
+import androidx.core.content.ContextCompat.startActivity
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
@@ -13,15 +15,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.databinding.RepoItemBinding
 import com.example.headwayTestTask.network.model.GitHubSearchItemModel
+import io.reactivex.subjects.PublishSubject
 
 /**
  * Adapter which manages a collection of GitHubSearchItemModel
  * */
-class GitHubSearchAdapter :
+class GitHubSearchAdapter(
+    private var mData : MutableList<GitHubSearchItemModel>,
+    private val mListener: GitHubSearchItemClickListener
+) :
     RecyclerView.Adapter<GitHubSearchAdapter.GitHubSearchViewHolder>()
 {
 
-    private var mData : MutableList<GitHubSearchItemModel> = mutableListOf()
+
+    private val clickSubject = PublishSubject.create<String>()
+//    val clickEvent: Observable<String> = clickSubject
 
     /**
      * Appends a new list of GitHub search items to existing list
@@ -60,14 +68,16 @@ class GitHubSearchAdapter :
     }
 
     override fun onBindViewHolder(holder: GitHubSearchViewHolder, position: Int) {
-        holder.bind(mData[position])
+        holder.bind(mData[position], mListener)
     }
 
     inner class GitHubSearchViewHolder(
         private val binding: RepoItemBinding
         ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: GitHubSearchItemModel) {
+        fun bind(item: GitHubSearchItemModel, listener: GitHubSearchItemClickListener) {
+            binding.root.setOnClickListener{listener.onGitHubSearchItemClicked(item)}
+            binding.repoItemClick = listener
             binding.repoName.text = when(item.name.length) {
                 in 0..24 -> item.name
                 else ->  item.name.removeRange(24, item.name.length) + "..."
@@ -80,6 +90,10 @@ class GitHubSearchAdapter :
             binding.repoLanguage.text = item.language
             binding.repoStargazersCount.text = item.stargazers_count
         }
+    }
+
+    interface GitHubSearchItemClickListener {
+        fun onGitHubSearchItemClicked(item: GitHubSearchItemModel)
     }
 
 }

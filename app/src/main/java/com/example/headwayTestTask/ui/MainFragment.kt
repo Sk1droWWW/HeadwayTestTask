@@ -2,6 +2,7 @@ package com.example.headwayTestTask.ui
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.databinding.MainFragmentBinding
+import com.example.headwayTestTask.network.model.GitHubSearchItemModel
 import com.example.headwayTestTask.network.model.GitHubSearchModel
 import com.example.headwayTestTask.network.service.GithubApiService
 import com.example.headwayTestTask.network.service.SearchRepositoryProvider
@@ -26,9 +28,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.OAuthProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import android.content.ActivityNotFoundException
+import androidx.core.content.ContextCompat
 
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListener {
 
     companion object {
         const val TAG = "MainFragment"
@@ -45,7 +49,7 @@ class MainFragment : Fragment() {
 
     // Adapter
     private val searchAdapter: GitHubSearchAdapter
-            by lazy { GitHubSearchAdapter() }
+            by lazy { GitHubSearchAdapter(mutableListOf(), this) }
 
 
     override fun onCreateView(
@@ -94,10 +98,10 @@ class MainFragment : Fragment() {
         searchAdapter.addData(searchItemList)
     }
 
-    private fun setRecyclerData(it: GitHubSearchModel?) {
+   /* private fun setRecyclerData(it: GitHubSearchModel?) {
         binding.searchResult.adapter = GitHubSearchAdapter()
 
-    }
+    }*/
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -181,4 +185,20 @@ class MainFragment : Fragment() {
             }
         }
     }
+
+     override fun onGitHubSearchItemClicked(item: GitHubSearchItemModel) {
+         try {
+             val url = item.htmlUrl
+             val intent = Intent(Intent.ACTION_VIEW)
+             intent.data = Uri.parse(url)
+             startActivity(intent)
+         } catch (e: ActivityNotFoundException) {
+             Toast.makeText(
+                 requireContext(),
+                 "No application can handle this request. Please install a web browser or check your URL.",
+                 Toast.LENGTH_LONG
+             ).show()
+             e.printStackTrace()
+         }
+     }
 }
