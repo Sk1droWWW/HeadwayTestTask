@@ -5,12 +5,15 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat.startActivity
+import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.databinding.RepoItemBinding
@@ -21,15 +24,13 @@ import io.reactivex.subjects.PublishSubject
  * Adapter which manages a collection of GitHubSearchItemModel
  * */
 class GitHubSearchAdapter(
-    private var mData : MutableList<GitHubSearchItemModel>,
     private val mListener: GitHubSearchItemClickListener
 ) :
-    RecyclerView.Adapter<GitHubSearchAdapter.GitHubSearchViewHolder>()
+    ListAdapter<GitHubSearchItemModel, GitHubSearchAdapter.GitHubSearchViewHolder>
+        (GitHubSearchItemDiffCallback())
 {
 
-
-    private val clickSubject = PublishSubject.create<String>()
-//    val clickEvent: Observable<String> = clickSubject
+    private var mData : MutableList<GitHubSearchItemModel> =  mutableListOf()
 
     /**
      * Appends a new list of GitHub search items to existing list
@@ -43,7 +44,6 @@ class GitHubSearchAdapter(
             mData.addAll(data)
 
             notifyItemRangeInserted(toAddPos, addedSize)
-//            notifyDataSetChanged()
         }
     }
 
@@ -62,7 +62,7 @@ class GitHubSearchAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GitHubSearchViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = RepoItemBinding.inflate(inflater)
+        val binding = RepoItemBinding.inflate(inflater, parent, false)
 
         return GitHubSearchViewHolder(binding)
     }
@@ -78,6 +78,8 @@ class GitHubSearchAdapter(
         fun bind(item: GitHubSearchItemModel, listener: GitHubSearchItemClickListener) {
             binding.root.setOnClickListener{listener.onGitHubSearchItemClicked(item)}
             binding.repoItemClick = listener
+
+            // TODO refactor
             binding.repoName.text = when(item.name.length) {
                 in 0..24 -> item.name
                 else ->  item.name.removeRange(24, item.name.length) + "..."
@@ -96,4 +98,22 @@ class GitHubSearchAdapter(
         fun onGitHubSearchItemClicked(item: GitHubSearchItemModel)
     }
 
+}
+
+class GitHubSearchItemDiffCallback : DiffUtil.ItemCallback<GitHubSearchItemModel>() {
+
+    override fun areItemsTheSame(
+        oldItem: GitHubSearchItemModel,
+        newItem: GitHubSearchItemModel
+    ): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+
+    override fun areContentsTheSame(
+        oldItem: GitHubSearchItemModel,
+        newItem: GitHubSearchItemModel
+    ): Boolean {
+        return oldItem == newItem
+    }
 }
