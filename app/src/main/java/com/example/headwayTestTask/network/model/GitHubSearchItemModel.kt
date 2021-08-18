@@ -13,7 +13,8 @@ data class GitHubSearchItemModel (
         @SerializedName("created_at")       val createdAt : String,
         @SerializedName("updated_at")       val updatedAt : String,
         @SerializedName("language")         val language : String,
-        @SerializedName("stargazers_count") val stargazers_count : String)
+        @SerializedName("stargazers_count") val stargazers_count : String,
+        var visitedFlag : String = "")
 {
     data class Owner (
             @SerializedName("id")               val id : Int,

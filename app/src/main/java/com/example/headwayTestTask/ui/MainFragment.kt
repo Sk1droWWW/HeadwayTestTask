@@ -29,6 +29,7 @@ import com.google.firebase.auth.OAuthProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import android.content.ActivityNotFoundException
+import android.text.TextUtils.indexOf
 import androidx.core.content.ContextCompat
 
 
@@ -41,15 +42,12 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         fun newInstance() = MainFragment()
     }
 
-    // Get a reference to the ViewModel scoped to this Fragment
     private val viewModel by viewModels<MainViewModel>()
 
-    //    private lateinit var viewModel: MainViewModel
     private lateinit var binding: MainFragmentBinding
 
-    // Adapter
     private val searchAdapter: GitHubSearchAdapter
-            by lazy { GitHubSearchAdapter(this) }
+            by lazy { GitHubSearchAdapter(viewModel.itemList, this) }
 
 
     override fun onCreateView(
@@ -69,26 +67,12 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         super.onViewCreated(view, savedInstanceState)
         observeAuthenticationState()
 
-        // Get a reference to the ViewModel associated with this fragment.
         val mainFragmentViewModel = MainViewModel()
 
         binding.searchResult.layoutManager = LinearLayoutManager(requireContext())
         binding.searchResult.adapter = searchAdapter
         binding.loginButton.setOnClickListener { launchSignInFlow() }
-
-        binding.searchButton.setOnClickListener {
-            val apiService = GithubApiService.create()
-            val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
-            repository.searchGitHubRepo(binding.searchEditText.text.toString())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe ({
-                        result ->
-                    populateList(result)
-                }, { error ->
-                    error.printStackTrace()
-                })
-        }
+        binding.searchButton.setOnClickListener { searchGitHubRepos() }
 
         mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { it ->
             binding.searchButton.isEnabled =
@@ -101,11 +85,6 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         searchAdapter.clearAll()
         searchAdapter.addData(searchItemList)
     }
-
-   /* private fun setRecyclerData(it: GitHubSearchModel?) {
-        binding.searchResult.adapter = GitHubSearchAdapter()
-
-    }*/
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -155,14 +134,12 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         })
     }
 
-
     private fun getPersonalizationMessage(): String {
         return String.format(
             resources.getString(R.string.welcome_message) +
                     FirebaseAuth.getInstance().currentUser?.displayName,
         )
     }
-
 
     /** Github sign in option
      */
@@ -188,12 +165,28 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         }
     }
 
-     override fun onGitHubSearchItemClicked(item: GitHubSearchItemModel) {
+    private fun searchGitHubRepos() {
+        val apiService = GithubApiService.create()
+        val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
+
+        repository.searchGitHubRepo(binding.searchEditText.text.toString())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe ({ result -> populateList(result) },
+                { error -> error.printStackTrace()
+                })
+    }
+
+    override fun onGitHubSearchItemClicked(item: GitHubSearchItemModel) {
+         val visitedFlag = "visited"
          try {
              val url = item.htmlUrl
              val intent = Intent(Intent.ACTION_VIEW)
              intent.data = Uri.parse(url)
              startActivity(intent)
+
+             item.visitedFlag = visitedFlag
+             binding.searchResult.adapter?.notifyItemChanged(viewModel.itemList.indexOf(item))
          } catch (e: ActivityNotFoundException) {
              Toast.makeText(
                  requireContext(),

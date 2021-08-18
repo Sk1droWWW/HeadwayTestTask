@@ -24,13 +24,12 @@ import io.reactivex.subjects.PublishSubject
  * Adapter which manages a collection of GitHubSearchItemModel
  * */
 class GitHubSearchAdapter(
+    private var mData : MutableList<GitHubSearchItemModel>,
     private val mListener: GitHubSearchItemClickListener
 ) :
     ListAdapter<GitHubSearchItemModel, GitHubSearchAdapter.GitHubSearchViewHolder>
         (GitHubSearchItemDiffCallback())
 {
-
-    private var mData : MutableList<GitHubSearchItemModel> =  mutableListOf()
 
     /**
      * Appends a new list of GitHub search items to existing list
@@ -47,8 +46,6 @@ class GitHubSearchAdapter(
         }
     }
 
-    override fun getItemCount() = mData.size
-
     /**
      * Clears both Header and all existing Search items
      *
@@ -59,6 +56,8 @@ class GitHubSearchAdapter(
 
         notifyItemRangeRemoved(0, size + 1)
     }
+
+    override fun getItemCount() = mData.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GitHubSearchViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -79,7 +78,7 @@ class GitHubSearchAdapter(
             binding.root.setOnClickListener{listener.onGitHubSearchItemClicked(item)}
             binding.repoItemClick = listener
 
-            // TODO refactor
+            // TODO refactor to @BindingAdapters
             binding.repoName.text = when(item.name.length) {
                 in 0..24 -> item.name
                 else ->  item.name.removeRange(24, item.name.length) + "..."
@@ -91,6 +90,7 @@ class GitHubSearchAdapter(
             binding.repoLastUpdate.text = item.createdAt
             binding.repoLanguage.text = item.language
             binding.repoStargazersCount.text = item.stargazers_count
+            binding.repoVisitedFlag.text = item.visitedFlag
         }
     }
 

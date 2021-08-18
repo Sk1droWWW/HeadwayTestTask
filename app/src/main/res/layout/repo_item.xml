@@ -63,6 +63,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 tools:text="Updated 2days ago"/>
+
+            <TextView
+                android:id="@+id/repo_visited_flag"
+                android:text="@{item.visitedFlag}"
+                android:gravity="end"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                tools:text="Visited" />
         </LinearLayout>
     </LinearLayout>
 </layout>

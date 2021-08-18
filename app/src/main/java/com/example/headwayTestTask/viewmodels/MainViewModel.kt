@@ -9,6 +9,8 @@ import io.reactivex.Observable
 
 class MainViewModel : ViewModel() {
 
+    var itemList : MutableList<GitHubSearchItemModel> =  mutableListOf()
+
     enum class AuthenticationState {
         AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
     }
@@ -20,11 +22,6 @@ class MainViewModel : ViewModel() {
             AuthenticationState.UNAUTHENTICATED
         }
     }
-
-//    var searchButtonState = LiveData<Boolean>(authenticationState == AuthenticationState.AUTHENTICATED)
-//
-//    private val searchButtonStateMutable = MutableLiveData<Boolean>()
-//    val searchButtonState = searchButtonStateMutable as LiveData<Boolean>
 
     fun onRepoClicked() {
 
