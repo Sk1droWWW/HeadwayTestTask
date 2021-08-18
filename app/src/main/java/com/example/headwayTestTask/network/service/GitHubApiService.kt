@@ -28,7 +28,7 @@ interface GithubApiService {
                 .baseUrl("https://api.github.com/")
                 .build()
 
-            return retrofit.create(GithubApiService::class.java);
+            return retrofit.create(GithubApiService::class.java)
         }
     }
 }

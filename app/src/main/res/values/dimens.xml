@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="search_edt_height">48dp</dimen>
+    <dimen name="default_start_margin">20dp</dimen>
+    <dimen name="search_edt_end_margin">8dp</dimen>
+    <dimen name="search_result_rv_margin_top">20dp</dimen>
+    <dimen name="search_result_rv_margin_bottom">20dp</dimen>
+    <dimen name="search_result_rv_padding">4dp</dimen>
+    <dimen name="welcome_tv_margin_bottom">8dp</dimen>
+    <dimen name="welcome_tv_padding">10dp</dimen>
+    <dimen name="default_bottom_margin">20dp</dimen>
+    <dimen name="default_end_margin">20dp</dimen>
+    <dimen name="default_top_margin">20dp</dimen>
+    <dimen name="repo_item_padding">4dp</dimen>
+    <dimen name="repo_item_margin">8dp</dimen>
+</resources>

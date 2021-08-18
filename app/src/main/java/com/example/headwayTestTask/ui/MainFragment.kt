@@ -1,6 +1,7 @@
 package com.example.headwayTestTask.ui
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -28,9 +29,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.OAuthProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import android.content.ActivityNotFoundException
-import android.text.TextUtils.indexOf
-import androidx.core.content.ContextCompat
 
 
 class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListener {
@@ -69,21 +67,15 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
 
         val mainFragmentViewModel = MainViewModel()
 
-        binding.searchResult.layoutManager = LinearLayoutManager(requireContext())
-        binding.searchResult.adapter = searchAdapter
-        binding.loginButton.setOnClickListener { launchSignInFlow() }
-        binding.searchButton.setOnClickListener { searchGitHubRepos() }
+        binding.searchResultRv.layoutManager = LinearLayoutManager(requireContext())
+        binding.searchResultRv.adapter = searchAdapter
+        binding.loginBtn.setOnClickListener { launchSignInFlow() }
+        binding.searchBtn.setOnClickListener { searchGitHubRepos() }
 
         mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { it ->
-            binding.searchButton.isEnabled =
+            binding.searchBtn.isEnabled =
                 it.equals(MainViewModel.AuthenticationState.AUTHENTICATED)
         })
-    }
-
-    private fun populateList(response: GitHubSearchModel?) {
-        val searchItemList = response?.items
-        searchAdapter.clearAll()
-        searchAdapter.addData(searchItemList)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -115,18 +107,18 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         viewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
             when (authenticationState) {
                 MainViewModel.AuthenticationState.AUTHENTICATED -> {
-                    binding.welcomeText.text = getPersonalizationMessage()
+                    binding.welcomeTv.text = getPersonalizationMessage()
 
-                    binding.loginButton.text = getString(R.string.logout_button_text)
-                    binding.loginButton.setOnClickListener {
+                    binding.loginBtn.text = getString(R.string.logout_button_text)
+                    binding.loginBtn.setOnClickListener {
                         AuthUI.getInstance().signOut(requireContext())
                     }
                 }
                 else -> {
-                    binding.welcomeText.text = resources.getString(R.string.welcome_message)
+                    binding.welcomeTv.text = resources.getString(R.string.welcome_message)
 
-                    binding.loginButton.text = getString(R.string.login_button_text)
-                    binding.loginButton.setOnClickListener {
+                    binding.loginBtn.text = getString(R.string.login_button_text)
+                    binding.loginBtn.setOnClickListener {
                         launchSignInFlow()
                     }
                 }
@@ -154,7 +146,7 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
                 requireActivity(),
                 provider.build()
             ).addOnSuccessListener {
-                binding.searchButton.isEnabled = true
+                binding.searchBtn.isEnabled = true
             }
         } else {
             result.addOnSuccessListener {
@@ -169,31 +161,41 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         val apiService = GithubApiService.create()
         val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
 
-        repository.searchGitHubRepo(binding.searchEditText.text.toString())
+        repository.searchGitHubRepo(binding.searchEdt.text.toString())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
-            .subscribe ({ result -> populateList(result) },
-                { error -> error.printStackTrace()
+            .subscribe(
+                { result -> populateList(result) },
+                { error ->
+                    error.printStackTrace()
                 })
     }
 
-    override fun onGitHubSearchItemClicked(item: GitHubSearchItemModel) {
-         val visitedFlag = "visited"
-         try {
-             val url = item.htmlUrl
-             val intent = Intent(Intent.ACTION_VIEW)
-             intent.data = Uri.parse(url)
-             startActivity(intent)
+    private fun populateList(response: GitHubSearchModel?) {
+        val searchItemList = response?.items
+        searchAdapter.clearAll()
+        searchAdapter.addData(searchItemList)
+    }
 
-             item.visitedFlag = visitedFlag
-             binding.searchResult.adapter?.notifyItemChanged(viewModel.itemList.indexOf(item))
-         } catch (e: ActivityNotFoundException) {
-             Toast.makeText(
-                 requireContext(),
-                 "No application can handle this request. Please install a web browser or check your URL.",
-                 Toast.LENGTH_LONG
-             ).show()
-             e.printStackTrace()
-         }
-     }
+    override fun onGitHubSearchItemClicked(item: GitHubSearchItemModel?) {
+        val visitedFlag = "visited"
+
+        try {
+            val url = item?.htmlUrl
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(url)
+            startActivity(intent)
+
+            item?.visitedFlag = visitedFlag
+            binding.searchResultRv
+                .adapter?.notifyItemChanged(viewModel.itemList.indexOf(item))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(
+                requireContext(),
+                "No application can handle this request. Please install a web browser or check your URL.",
+                Toast.LENGTH_LONG
+            ).show()
+            e.printStackTrace()
+        }
+    }
 }

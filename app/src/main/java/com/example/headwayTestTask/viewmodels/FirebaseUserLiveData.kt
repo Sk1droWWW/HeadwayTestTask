@@ -1,8 +1,8 @@
 package com.example.headwayTestTask.viewmodels
 
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.LiveData
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 
 // TODO migrate to Rx..
