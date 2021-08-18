@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.LiveData
 
+
+// TODO migrate to Rx..
 /**
  * This class observes the current FirebaseUser. If there is no logged in user, FirebaseUser will
  * be null.
@@ -13,9 +15,6 @@ import androidx.lifecycle.LiveData
 class FirebaseUserLiveData : LiveData<FirebaseUser?>() {
     private val firebaseAuth = FirebaseAuth.getInstance()
 
-    // TODO set the value of this FireUserLiveData object by hooking it up to equal the value of the
-    //  current FirebaseUser. You can utilize the FirebaseAuth.AuthStateListener callback to get
-    //  updates on the current Firebase user logged into the app.
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         value = firebaseAuth.currentUser
     }

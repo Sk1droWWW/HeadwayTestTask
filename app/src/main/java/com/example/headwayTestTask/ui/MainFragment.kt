@@ -49,7 +49,7 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
 
     // Adapter
     private val searchAdapter: GitHubSearchAdapter
-            by lazy { GitHubSearchAdapter(mutableListOf(), this) }
+            by lazy { GitHubSearchAdapter(this) }
 
 
     override fun onCreateView(
@@ -71,9 +71,11 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
 
         // Get a reference to the ViewModel associated with this fragment.
         val mainFragmentViewModel = MainViewModel()
+
         binding.searchResult.layoutManager = LinearLayoutManager(requireContext())
         binding.searchResult.adapter = searchAdapter
         binding.loginButton.setOnClickListener { launchSignInFlow() }
+
         binding.searchButton.setOnClickListener {
             val apiService = GithubApiService.create()
             val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
@@ -82,14 +84,16 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
                 .subscribeOn(Schedulers.io())
                 .subscribe ({
                         result ->
-                    Toast.makeText(requireContext(),
-                        "There are ${result.items?.size?.toString()}",
-                        Toast.LENGTH_LONG).show()
                     populateList(result)
                 }, { error ->
                     error.printStackTrace()
                 })
         }
+
+        mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { it ->
+            binding.searchButton.isEnabled =
+                it.equals(MainViewModel.AuthenticationState.AUTHENTICATED)
+        })
     }
 
     private fun populateList(response: GitHubSearchModel?) {
@@ -173,9 +177,7 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
                 requireActivity(),
                 provider.build()
             ).addOnSuccessListener {
-                Toast.makeText(requireContext(), "yep", Toast.LENGTH_SHORT).show()
-            }.addOnFailureListener {
-                Toast.makeText(requireContext(), "nope", Toast.LENGTH_LONG).show()
+                binding.searchButton.isEnabled = true
             }
         } else {
             result.addOnSuccessListener {
