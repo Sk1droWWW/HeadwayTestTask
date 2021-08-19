@@ -10,7 +10,7 @@ buildscript {
         nav_version = '2.3.5'
         databinding_version = '4.2.2'
         retrofit_version = '2.9.0'
-        paging_version = '2.1.2'
+        paging_version = '3.0.0-alpha03'
         githubapi_version = '1.132'
     }
     repositories {
