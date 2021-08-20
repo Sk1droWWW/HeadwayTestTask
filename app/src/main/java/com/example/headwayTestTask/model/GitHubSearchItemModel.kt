@@ -1,10 +1,10 @@
-package com.example.headwayTestTask.network.model
+package com.example.headwayTestTask.model
 
 import com.google.gson.annotations.SerializedName
 
 
 data class GitHubSearchItemModel (
-        @SerializedName("id")               val id : Int,
+        @SerializedName("id")               val id : Long,
         @SerializedName("name")             val name : String,
         @SerializedName("full_name")        val fullName : String,
         @SerializedName("owner")            val owner : Owner,
