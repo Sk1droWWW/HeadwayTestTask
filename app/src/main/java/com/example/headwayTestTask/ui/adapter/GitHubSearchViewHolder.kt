@@ -1,17 +1,17 @@
-package com.example.headwayTestTask.ui
+package com.example.headwayTestTask.ui.adapter
 
 import androidx.recyclerview.widget.RecyclerView
 import com.example.headwayTestTask.databinding.RepoItemBinding
-import com.example.headwayTestTask.network.model.GitHubSearchItemModel
-import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
+import com.example.headwayTestTask.model.GitHubSearchItemModel
 
 class GitHubSearchViewHolder(
-    private val binding: RepoItemBinding
+    private val binding: RepoItemBinding,
+    private val onClickListener: OnClickListener
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(item: GitHubSearchItemModel, listener: GitHubSearchAdapter.GitHubSearchItemClickListener) {
-        binding.root.setOnClickListener { listener.onGitHubSearchItemClicked(item) }
-        binding.repoItemClick = listener
+    fun bind(item: GitHubSearchItemModel) {
+        binding.root.setOnClickListener { onClickListener.onRepoClick(item) }
+//        binding.repoItemClick = listener
 
         // TODO refactor to @BindingAdapters
         binding.repoName.text = when (item.name.length) {
@@ -26,5 +26,9 @@ class GitHubSearchViewHolder(
         binding.repoLanguage.text = item.language
         binding.repoStargazersCount.text = item.stargazers_count
         binding.repoVisitedFlag.text = item.visitedFlag
+    }
+
+    interface OnClickListener {
+        fun onRepoClick(repo: GitHubSearchItemModel)
     }
 }
