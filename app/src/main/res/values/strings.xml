@@ -6,4 +6,7 @@
     <string name="welcome_message">Hi </string>
     <string name="search_edt_hint">Enter name of repo..</string>
     <string name="search_btn_text">Search</string>
+    <string name="error_not_found">No Results Found for "%1s"</string>
+    <string name="error_connection">Could Not Connect to Server, Try Again Later</string>
+    <string name="error_no_query">Type Reponame In Searchbox To Start Searching</string>
 </resources>

@@ -5,9 +5,16 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
 xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.example.headwayTestTask.network.NetworkStatus" />
+        <import type="android.view.View" />
+
         <variable
-            name="MainViewModel"
-            type="com.example.headwayTestTask.viewmodels.MainViewModel" />
+        name="MainViewModel"
+        type="com.example.headwayTestTask.viewmodels.MainViewModel" />
+
+        <variable
+            name="networkStatus"
+            type="com.example.headwayTestTask.network.NetworkStatus" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,8 +47,8 @@ xmlns:tools="http://schemas.android.com/tools">
             app:layout_constraintTop_toTopOf="parent"
             />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/search_result_rv"
+
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/search_result_rv_margin_top"
@@ -52,8 +59,34 @@ xmlns:tools="http://schemas.android.com/tools">
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@id/search_edt"
             app:layout_constraintTop_toBottomOf="@+id/search_btn"
-            app:layout_constraintVertical_bias="1.0"
-            tools:listitem="@layout/repo_item" />
+            app:layout_constraintVertical_bias="1.0">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/search_result_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/repo_item" />
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/default_top_margin"
+                android:visibility="@{networkStatus.status == NetworkStatus.LOADING ? View.VISIBLE : View.INVISIBLE}" />
+
+            <TextView
+                android:id="@+id/text_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/network_text_massage_margin"
+                android:padding="@dimen/network_text_massage_padding"
+                android:text="@{networkStatus.message}"
+                android:textStyle="bold"
+                android:visibility="@{networkStatus.showMessage ? View.VISIBLE : View.INVISIBLE}"
+                tools:text="No Result Found for xyz" />
+
+        </FrameLayout>
+
 
         <TextView
             android:id="@+id/welcome_tv"
