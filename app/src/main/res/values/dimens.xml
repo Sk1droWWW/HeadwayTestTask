@@ -15,4 +15,5 @@
     <dimen name="repo_item_margin">8dp</dimen>
     <dimen name="network_text_massage_margin">8dp</dimen>
     <dimen name="network_text_massage_padding">8dp</dimen>
+    <dimen name="default_margin">20dp</dimen>
 </resources>

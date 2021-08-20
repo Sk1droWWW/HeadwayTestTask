@@ -9,5 +9,17 @@
         android:id="@+id/mainFragment"
         android:name="com.example.headwayTestTask.ui.MainFragment"
         android:label="MainFragment"
-        tools:layout="@layout/main_fragment"/>
+        tools:layout="@layout/main_fragment">
+        <action
+            android:id="@+id/action_mainFragment_to_lastVisitedFragment"
+            app:destination="@id/lastVisitedFragment"
+            app:popUpTo="@id/lastVisitedFragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/lastVisitedFragment"
+        android:name="com.example.headwayTestTask.ui.LastVisitedFragment"
+        android:label="LastVisitedFragment"
+        tools:layout="@layout/last_visited_fragment"/>
 </navigation>

@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.databinding.MainFragmentBinding
@@ -20,19 +21,14 @@ import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.network.service.GithubApiService
 import com.example.headwayTestTask.network.service.SearchRepositoryProvider
-import com.example.headwayTestTask.network.service.UserRepositoryImpl
 import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
 import com.example.headwayTestTask.ui.adapter.GitHubSearchViewHolder
-import com.example.headwayTestTask.utils.RxViewObservable
 import com.example.headwayTestTask.viewmodels.MainViewModel
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.OAuthProvider
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 
 
 class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
@@ -45,7 +41,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
     }
 
 //    private val mainFragmentViewModel by viewModels<MainViewModel>()
-    lateinit var userRepository: UserRepositoryImpl
     private lateinit var mainFragmentViewModel: MainViewModel
     private val mDisposable = CompositeDisposable()
 
@@ -80,6 +75,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
         binding.loginBtn.setOnClickListener { launchSignInFlow() }
         binding.searchBtn.setOnClickListener { searchGitHubRepos() }
+        binding.navToLastVisitedBtn.setOnClickListener { openLastVisitedFragment() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -110,10 +106,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         searchAdapter = GitHubSearchAdapter(this)
         binding.searchResultRv.layoutManager = linearLayoutManager
         binding.searchResultRv.adapter = searchAdapter
-
-        /*mainFragmentViewModel.itemList.observe(this, Observer<PagedList<GitHubSearchItemModel>> {
-            searchAdapter.submitList(it)
-        })*/
     }
 
     /**
@@ -136,7 +128,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
                 else -> {
                     binding.welcomeTv.text = resources.getString(R.string.welcome_message)
 
-                    binding.loginBtn.text = getString(R.string.login_button_text)
+                    binding.loginBtn.text = getString(R.string.login_btn_text)
                     binding.loginBtn.setOnClickListener {
                         launchSignInFlow()
                     }
@@ -174,7 +166,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
                 it.equals(MainViewModel.AuthenticationState.AUTHENTICATED)
         })
 
-       /* mDisposable.add(
+        /*mDisposable.add(
             RxViewObservable.fromTextView(binding.searchEdt)
                 .debounce(500, TimeUnit.MILLISECONDS)
                 .distinctUntilChanged() // prevent duplicate call with same query
@@ -216,7 +208,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
     }
 
     private fun searchGitHubRepos() {
-
+        mainFragmentViewModel.setQuery(binding.searchEdt.text.toString())
 /*
        repository.searchGitHubRepo(binding.searchEdt.text.toString())
             .observeOn(AndroidSchedulers.mainThread())
@@ -237,6 +229,10 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
     }
 
+    private fun openLastVisitedFragment() {
+        findNavController().navigate(R.id.action_mainFragment_to_lastVisitedFragment)
+    }
+
     override fun onRepoClick(repo: GitHubSearchItemModel) {
         val visitedFlag = "visited"
 
@@ -246,6 +242,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
             intent.data = Uri.parse(url)
             startActivity(intent)
             repo?.visitedFlag = visitedFlag
+            binding.searchResultRv.adapter?.notifyDataSetChanged()
 
            /* repo?.visitedFlag = visitedFlag
             mainFragmentViewModel.itemList.value?.indexOf(repo)?.let {

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">HeadwayTestTask</string>
     <string name="github_login_btn">Login via Github</string>
-    <string name="login_button_text">Login</string>
+    <string name="login_btn_text">Login</string>
     <string name="logout_button_text">Logout</string>
     <string name="welcome_message">Hi </string>
     <string name="search_edt_hint">Enter name of repo..</string>
@@ -9,4 +9,6 @@
     <string name="error_not_found">No Results Found for "%1s"</string>
     <string name="error_connection">Could Not Connect to Server, Try Again Later</string>
     <string name="error_no_query">Type Reponame In Searchbox To Start Searching</string>
+    <string name="last_visited_repos_tv">Last Visited Repos</string>
+    <string name="last_visited_btn">Last Visited</string>
 </resources>

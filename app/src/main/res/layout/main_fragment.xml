@@ -13,6 +13,10 @@ xmlns:tools="http://schemas.android.com/tools">
         type="com.example.headwayTestTask.viewmodels.MainViewModel" />
 
         <variable
+            name="mainFragment"
+            type="com.example.headwayTestTask.ui.MainFragment" />
+
+        <variable
             name="networkStatus"
             type="com.example.headwayTestTask.network.NetworkStatus" />
     </data>
@@ -33,22 +37,21 @@ xmlns:tools="http://schemas.android.com/tools">
             app:layout_constraintEnd_toStartOf="@+id/search_btn"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/search_btn"
-            />
+            app:layout_constraintTop_toTopOf="@id/search_btn" />
 
         <Button
             android:id="@+id/search_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/search_btn_text"
-            android:layout_marginEnd="@dimen/default_end_margin"
             android:layout_marginTop="@dimen/default_top_margin"
+            android:layout_marginEnd="@dimen/default_end_margin"
+            android:text="@string/search_btn_text"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <FrameLayout
+            android:id="@+id/frameLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="@dimen/search_result_rv_margin_top"
@@ -101,17 +104,36 @@ xmlns:tools="http://schemas.android.com/tools">
             app:layout_constraintRight_toRightOf="parent"
             tools:text="Hi" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/login_btn"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_end_margin"
+            android:layout_marginStart="@dimen/default_start_margin"
             android:layout_marginBottom="@dimen/default_bottom_margin"
             android:background="@color/purple_700"
             android:textColor="@color/white"
+            app:flow_horizontalBias="0"
+
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/nav_to_last_visited_btn"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="@string/login_button_text" />
+            tools:text="@string/login_btn_text" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/nav_to_last_visited_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/purple_700"
+            android:textColor="@color/white"
+            app:flow_horizontalBias="1"
+            android:layout_marginEnd="@dimen/default_end_margin"
+            app:layout_constraintBottom_toBottomOf="@+id/login_btn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/login_btn"
+            android:text="@string/last_visited_btn" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
