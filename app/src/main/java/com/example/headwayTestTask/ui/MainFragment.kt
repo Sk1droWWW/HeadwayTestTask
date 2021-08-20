@@ -12,26 +12,30 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.databinding.MainFragmentBinding
-import com.example.headwayTestTask.network.model.GitHubSearchItemModel
-import com.example.headwayTestTask.network.model.GitHubSearchModel
+import com.example.headwayTestTask.network.NetworkStatus
+import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.network.service.GithubApiService
 import com.example.headwayTestTask.network.service.SearchRepositoryProvider
+import com.example.headwayTestTask.network.service.UserRepositoryImpl
 import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
+import com.example.headwayTestTask.ui.adapter.GitHubSearchViewHolder
+import com.example.headwayTestTask.utils.RxViewObservable
 import com.example.headwayTestTask.viewmodels.MainViewModel
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.OAuthProvider
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 
 
-class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListener {
+class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
     companion object {
         const val TAG = "MainFragment"
@@ -40,12 +44,14 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         fun newInstance() = MainFragment()
     }
 
-    private val viewModel by viewModels<MainViewModel>()
+//    private val mainFragmentViewModel by viewModels<MainViewModel>()
+    lateinit var userRepository: UserRepositoryImpl
+    private lateinit var mainFragmentViewModel: MainViewModel
+    private val mDisposable = CompositeDisposable()
 
     private lateinit var binding: MainFragmentBinding
+    private lateinit var searchAdapter: GitHubSearchAdapter
 
-    private val searchAdapter: GitHubSearchAdapter
-            by lazy { GitHubSearchAdapter(viewModel.itemList, this) }
 
 
     override fun onCreateView(
@@ -63,19 +69,17 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val apiService = GithubApiService.create()
+        val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
+        mainFragmentViewModel = MainViewModel(repository)
+
+        initReposRecyclerView()
         observeAuthenticationState()
+        observeUi()
 
-        val mainFragmentViewModel = MainViewModel()
-
-        binding.searchResultRv.layoutManager = LinearLayoutManager(requireContext())
-        binding.searchResultRv.adapter = searchAdapter
         binding.loginBtn.setOnClickListener { launchSignInFlow() }
         binding.searchBtn.setOnClickListener { searchGitHubRepos() }
-
-        mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { it ->
-            binding.searchBtn.isEnabled =
-                it.equals(MainViewModel.AuthenticationState.AUTHENTICATED)
-        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -97,6 +101,21 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         }
     }
 
+    private fun initReposRecyclerView() {
+        val linearLayoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.VERTICAL,
+            false
+        )
+        searchAdapter = GitHubSearchAdapter(this)
+        binding.searchResultRv.layoutManager = linearLayoutManager
+        binding.searchResultRv.adapter = searchAdapter
+
+        /*mainFragmentViewModel.itemList.observe(this, Observer<PagedList<GitHubSearchItemModel>> {
+            searchAdapter.submitList(it)
+        })*/
+    }
+
     /**
      * Observes the authentication state and changes the UI accordingly.
      * If there is a logged in user: (1) show a logout button and (2) display their name.
@@ -104,7 +123,7 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
      */
     private fun observeAuthenticationState() {
 
-        viewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
+        mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
             when (authenticationState) {
                 MainViewModel.AuthenticationState.AUTHENTICATED -> {
                     binding.welcomeTv.text = getPersonalizationMessage()
@@ -126,6 +145,52 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
         })
     }
 
+    private fun observeUi() {
+        mainFragmentViewModel.userPagedList.observe(requireActivity(), Observer {
+            searchAdapter.submitList(it)
+        })
+
+        mainFragmentViewModel.networkStatus.observe(requireActivity(), Observer {
+            when (it.status) {
+                NetworkStatus.NOT_FOUND -> {
+                    it.message = getString(
+                        R.string.error_not_found,
+                        mainFragmentViewModel.query.value
+                    )
+                }
+                NetworkStatus.ERROR -> {
+                    if (mainFragmentViewModel.query.value.isNullOrEmpty()) {
+                        it.message = getString(R.string.error_no_query)
+                    } else {
+                        it.message = getString(R.string.error_connection)
+                    }
+                }
+            }
+            binding.networkStatus = it
+        })
+
+        mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { it ->
+            binding.searchBtn.isEnabled =
+                it.equals(MainViewModel.AuthenticationState.AUTHENTICATED)
+        })
+
+       /* mDisposable.add(
+            RxViewObservable.fromTextView(binding.searchEdt)
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .distinctUntilChanged() // prevent duplicate call with same query
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        mainFragmentViewModel.setQuery(it)
+                    },
+                    {
+                        Log.e(TAG, it.message ?: "")
+                    }
+                )
+        )*/
+    }
+
     private fun getPersonalizationMessage(): String {
         return String.format(
             resources.getString(R.string.welcome_message) +
@@ -136,7 +201,6 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
     /** Github sign in option
      */
     private fun launchSignInFlow() {
-
         val auth = FirebaseAuth.getInstance()
         val provider = OAuthProvider.newBuilder("github.com")
         val result = auth.pendingAuthResult
@@ -148,20 +212,13 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
             ).addOnSuccessListener {
                 binding.searchBtn.isEnabled = true
             }
-        } else {
-            result.addOnSuccessListener {
-                Toast.makeText(requireContext(), "yep", Toast.LENGTH_SHORT).show()
-            }.addOnFailureListener {
-                Toast.makeText(requireContext(), "nope", Toast.LENGTH_LONG).show()
-            }
         }
     }
 
     private fun searchGitHubRepos() {
-        val apiService = GithubApiService.create()
-        val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
 
-        repository.searchGitHubRepo(binding.searchEdt.text.toString())
+/*
+       repository.searchGitHubRepo(binding.searchEdt.text.toString())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.io())
             .subscribe(
@@ -169,26 +226,32 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
                 { error ->
                     error.printStackTrace()
                 })
+
+        val disposable = CompositeDisposable()
+        disposable.add(repository.searchGitHubRepo(binding.searchEdt.text.toString()).subscribeOn(Schedulers.io())
+            .mergeWith(repository.searchGitHubRepo(binding.searchEdt.text.toString()).subscribeOn(Schedulers.io()))
+                .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { result -> populateList(result) },
+                { error -> error.printStackTrace() }))*/
+
     }
 
-    private fun populateList(response: GitHubSearchModel?) {
-        val searchItemList = response?.items
-        searchAdapter.clearAll()
-        searchAdapter.addData(searchItemList)
-    }
-
-    override fun onGitHubSearchItemClicked(item: GitHubSearchItemModel?) {
+    override fun onRepoClick(repo: GitHubSearchItemModel) {
         val visitedFlag = "visited"
 
         try {
-            val url = item?.htmlUrl
+            val url = repo?.htmlUrl
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(url)
             startActivity(intent)
+            repo?.visitedFlag = visitedFlag
 
-            item?.visitedFlag = visitedFlag
-            binding.searchResultRv
-                .adapter?.notifyItemChanged(viewModel.itemList.indexOf(item))
+           /* repo?.visitedFlag = visitedFlag
+            mainFragmentViewModel.itemList.value?.indexOf(repo)?.let {
+                binding.searchResultRv
+                    .adapter?.notifyItemChanged(it)
+            }*/
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 requireContext(),
@@ -198,4 +261,6 @@ class MainFragment : Fragment(), GitHubSearchAdapter.GitHubSearchItemClickListen
             e.printStackTrace()
         }
     }
+
+
 }
