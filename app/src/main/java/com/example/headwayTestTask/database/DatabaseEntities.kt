@@ -2,7 +2,6 @@ package com.example.headwayTestTask.database
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.headwayTestTask.model.GitHubSearchItemModel
 
 
 /**
@@ -32,18 +31,3 @@ data class DatabaseRepos constructor(
     }
 }
 
-/**
- * Map domain entities to DatabaseVideos
- */
-fun GitHubSearchItemModel.asDatabaseEntity() : DatabaseRepos {
-    return DatabaseRepos(
-            name = this.name,
-            fullName = this.fullName,
-            description = this.description,
-            htmlUrl = this.htmlUrl,
-            updatedAt = this.updatedAt,
-            language = this.language,
-            stargazersCount = this.stargazersCount,
-            visitedFlag = this.visitedFlag
-        )
-}
