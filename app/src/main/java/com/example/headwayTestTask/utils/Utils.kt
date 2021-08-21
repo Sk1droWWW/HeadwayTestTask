@@ -37,3 +37,7 @@ fun GitHubSearchItemModel.asDatabaseEntity() : DatabaseRepos {
         visitedFlag = this.visitedFlag
     )
 }
+
+enum class AuthenticationState {
+    AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
+}

@@ -10,18 +10,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.database.getDatabaseInstance
 import com.example.headwayTestTask.databinding.LastVisitedFragmentBinding
-import com.example.headwayTestTask.network.service.GithubApiService
-import com.example.headwayTestTask.repository.SearchRepositoryProvider
 import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
-import com.example.headwayTestTask.viewmodels.MainViewModel
-import com.example.headwayTestTask.viewmodels.MainViewModelFactory
+import com.example.headwayTestTask.viewmodels.LastVisitedViewModel
+import com.example.headwayTestTask.viewmodels.LastVisitedViewModelFactory
 
 
 class LastVisitedFragment : Fragment() {
 
     private lateinit var binding: LastVisitedFragmentBinding
     private lateinit var visitedPagingAdapter: GitHubSearchAdapter
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: LastVisitedViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,13 +38,10 @@ class LastVisitedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val apiService = GithubApiService.create()
-        val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
-
         viewModel = ViewModelProvider(
             this,
-            MainViewModelFactory(repository)
-        )[MainViewModel::class.java]
+            LastVisitedViewModelFactory()
+        )[LastVisitedViewModel::class.java]
 
         initDatabase()
         initReposRecyclerView()

@@ -12,6 +12,7 @@ import com.example.headwayTestTask.model.datasource.PagingListener
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.model.GitHubSearchModel
 import com.example.headwayTestTask.repository.SearchRepository
+import com.example.headwayTestTask.utils.AuthenticationState
 import com.example.headwayTestTask.utils.asDomainModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -23,30 +24,22 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
 
     private val PAGE_SIZE = 30
 
-    enum class AuthenticationState {
-        AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
-    }
     private val compositeDisposable = CompositeDisposable()
-    private val mDisposable = CompositeDisposable()
     private val mPagingDataSourceFactory: PagingDataSourceFactory<GitHubSearchItemModel> =
         PagingDataSourceFactory(this)
     val query: MutableLiveData<String> = MutableLiveData()
 
     private var dataBaseInstance: ReposDatabase?= null
 
-    var lastVisitedReposList: MutableLiveData<List<GitHubSearchItemModel>> =
-        MutableLiveData()
     val reposPagedList: LiveData<PagedList<GitHubSearchItemModel>> =
         Transformations.switchMap(Transformations.distinctUntilChanged(query)) {
             search()
         }
 
-
     private var mNetworkStatus: MutableLiveData<NetworkStatus> = MutableLiveData()
     val networkStatus: LiveData<NetworkStatus>
         get() = mNetworkStatus
 
-    // TODO migrate to RxJava
     val authenticationState = FirebaseUserLiveData().map { user ->
         if (user != null) {
             AuthenticationState.AUTHENTICATED
@@ -77,23 +70,6 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
 
     }
 
-    fun getPersonData(){
-        dataBaseInstance?.repoDao?.getRepos()
-            ?.subscribeOn(Schedulers.io())
-            ?.observeOn(AndroidSchedulers.mainThread())
-            ?.subscribe ({
-                if (!it.isNullOrEmpty()) {
-                    lastVisitedReposList.postValue(it.asDomainModel())
-                } else {
-                    lastVisitedReposList.postValue(listOf())
-                }
-            },{
-            })?.let {
-                compositeDisposable.add(it)
-            }
-    }
-
-
     fun setQuery(value: String) {
         query.postValue(value)
     }
@@ -120,7 +96,7 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
 
         mNetworkStatus.postValue(NetworkStatus(NetworkStatus.LOADING))
         val queryParam = query.value ?: ""
-        mDisposable.add(
+        compositeDisposable.add(
             searchRepository.search(queryParam, 1)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
@@ -149,7 +125,7 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         callback: PageKeyedDataSource.LoadCallback<Int, GitHubSearchItemModel>
     ) {
         val queryParam = query.value ?: ""
-        mDisposable.add(
+        compositeDisposable.add(
             searchRepository.search(queryParam, params.key)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
@@ -160,12 +136,12 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     }
 
     override fun onCleared() {
+        super.onCleared()
+
         compositeDisposable.dispose()
         compositeDisposable.clear()
-
-        super.onCleared()
-        mDisposable.clear()
     }
+
 }
 
 

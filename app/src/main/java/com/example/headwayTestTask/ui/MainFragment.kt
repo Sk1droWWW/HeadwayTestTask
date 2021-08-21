@@ -25,6 +25,7 @@ import com.example.headwayTestTask.network.service.GithubApiService
 import com.example.headwayTestTask.repository.SearchRepositoryProvider
 import com.example.headwayTestTask.ui.adapter.GitHubSearchPagingAdapter
 import com.example.headwayTestTask.ui.adapter.GitHubSearchViewHolder
+import com.example.headwayTestTask.utils.AuthenticationState
 import com.example.headwayTestTask.utils.asDatabaseEntity
 import com.example.headwayTestTask.viewmodels.MainViewModel
 import com.example.headwayTestTask.viewmodels.MainViewModelFactory
@@ -47,7 +48,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 //    private val mainFragmentViewModel by viewModels<MainViewModel>()
     private lateinit var viewModelFactory: MainViewModelFactory
     private lateinit var mainFragmentViewModel: MainViewModel
-    private val mDisposable = CompositeDisposable()
 
     private lateinit var binding: MainFragmentBinding
     private lateinit var searchPagingAdapter: GitHubSearchPagingAdapter
@@ -132,7 +132,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
         mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
             when (authenticationState) {
-                MainViewModel.AuthenticationState.AUTHENTICATED -> {
+                AuthenticationState.AUTHENTICATED -> {
                     binding.welcomeTv.text = getPersonalizationMessage()
 
                     binding.loginBtn.text = getString(R.string.logout_button_text)
@@ -178,7 +178,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
         mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { it ->
             binding.searchBtn.isEnabled =
-                it.equals(MainViewModel.AuthenticationState.AUTHENTICATED)
+                it.equals(AuthenticationState.AUTHENTICATED)
         })
 
         /*mDisposable.add(
@@ -257,8 +257,8 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
             intent.data = Uri.parse(url)
             startActivity(intent)
             repo?.visitedFlag = visitedFlag
-            binding.searchResultRv.adapter?.notifyDataSetChanged()
-
+//            binding.searchResultRv.adapter.
+//            searchPagingAdapter.currentList.
             mainFragmentViewModel.saveDataIntoDb(repo.asDatabaseEntity())
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
