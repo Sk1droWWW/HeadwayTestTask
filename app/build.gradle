@@ -3,7 +3,6 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'androidx.navigation.safeargs.kotlin'
-//    id 'com.google.gms.google-services'
 }
 
 apply plugin: 'com.google.gms.google-services'
@@ -66,9 +65,14 @@ dependencies {
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation 'com.squareup.retrofit2:converter-gson:2.7.1' // Конвертер для работы с JSON
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1' // Перехватчик запросов
-    implementation 'com.squareup.okhttp3:okhttp:4.3.1' // OkHttp - это HTTP-клиент
+    implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.3.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.3.1'
+
+    // Room
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-rxjava2:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     // Firebase Auth
     implementation 'com.google.firebase:firebase-common-ktx:19.5.0'
