@@ -13,7 +13,6 @@ interface GithubApiService {
     @GET("search/repositories")
     fun getGitHubRepos(
         @Query("q")         searchParam : String,
-        @Query("since")     userId: Int,
         @Query("sort")      sort : String = "stars",
         @Query("order")     order : String = "desc",
         @Query("per_page")  perPage : Int = 15,

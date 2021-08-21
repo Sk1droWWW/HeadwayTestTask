@@ -6,7 +6,7 @@ import io.reactivex.Observable
 
 class SearchRepository(private val apiService: GithubApiService) {
     fun search(query: String, page: Int): Observable<List<GitHubSearchItemModel>> {
-        return apiService.getGitHubRepos(query, page).flatMap {
+        return apiService.getGitHubRepos(searchParam = query, page = page).flatMap {
             Observable.just(it.items)
         }
     }
