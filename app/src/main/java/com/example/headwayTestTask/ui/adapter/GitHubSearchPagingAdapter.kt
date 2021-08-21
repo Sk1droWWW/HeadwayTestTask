@@ -2,14 +2,19 @@ package com.example.headwayTestTask.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import com.example.headwayTestTask.databinding.RepoItemBinding
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 
-class GitHubSearchAdapter(
+/**
+ * Adapter which manages a collection of GitHubSearchItemModel
+ * */
+class GitHubSearchPagingAdapter(
     private val onClickListener: GitHubSearchViewHolder.OnClickListener
 ) :
-    ListAdapter<GitHubSearchItemModel, GitHubSearchViewHolder>
+// TODO Replace PagedListAdapter with PagedDataAdapter
+    PagedListAdapter<GitHubSearchItemModel, GitHubSearchViewHolder>
         (GitHubSearchItemDiffCallback()) {
 
 
@@ -26,4 +31,22 @@ class GitHubSearchAdapter(
         }
     }
 
+}
+
+class GitHubSearchItemDiffCallback : DiffUtil.ItemCallback<GitHubSearchItemModel>() {
+
+    override fun areItemsTheSame(
+        oldItem: GitHubSearchItemModel,
+        newItem: GitHubSearchItemModel
+    ): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+
+    override fun areContentsTheSame(
+        oldItem: GitHubSearchItemModel,
+        newItem: GitHubSearchItemModel
+    ): Boolean {
+        return oldItem == newItem
+    }
 }
