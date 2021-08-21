@@ -3,11 +3,13 @@ package com.example.headwayTestTask.network.service
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.model.GitHubSearchModel
 import io.reactivex.Observable
+import okhttp3.Cache
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.io.File
 
 interface GithubApiService {
 
@@ -37,16 +39,4 @@ interface GithubApiService {
     }
 }
 
-class SearchRepository(private val apiService: GithubApiService) {
-    fun search(query: String, page: Int): Observable<List<GitHubSearchItemModel>> {
-        return apiService.getGitHubRepos(query, page).flatMap {
-            Observable.just(it.items)
-        }
-    }
-}
 
-object SearchRepositoryProvider {
-    fun provideSearchRepository(apiService: GithubApiService): SearchRepository {
-        return SearchRepository(apiService)
-    }
-}
