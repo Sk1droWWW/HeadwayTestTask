@@ -12,19 +12,19 @@ import androidx.room.PrimaryKey
 /**
  * DatabaseRepos represents a video entity in the database.
  */
-@Entity (tableName = DatabaseRepos.TABLE_NAME)
+@Entity(tableName = DatabaseRepos.TABLE_NAME)
 data class DatabaseRepos constructor(
     @PrimaryKey(autoGenerate = true)
-    val id : Long = 0,
-    val name : String,
-    val fullName : String,
-    val description : String?,
-    val htmlUrl : String,
-    val updatedAt : String,
-    val language : String,
-    val stargazersCount : String,
-    var visitedFlag : String
-    ) {
+    val id: Long = 0,
+    val name: String,
+    val fullName: String,
+    val description: String?,
+    val htmlUrl: String,
+    val updatedAt: String,
+    val language: String,
+    val stargazersCount: String,
+    var visitedFlag: String
+) {
     companion object {
         const val TABLE_NAME = "Repos"
         const val MAX_SIZE = 20

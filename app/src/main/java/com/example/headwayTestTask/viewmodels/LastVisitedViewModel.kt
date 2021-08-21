@@ -13,7 +13,7 @@ class LastVisitedViewModel : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private var dataBaseInstance: ReposDatabase?= null
+    private var dataBaseInstance: ReposDatabase? = null
 
     var lastVisitedReposList: MutableLiveData<List<GitHubSearchItemModel>> =
         MutableLiveData()
@@ -22,17 +22,17 @@ class LastVisitedViewModel : ViewModel() {
         this.dataBaseInstance = dataBaseInstance
     }
 
-    fun getPersonData(){
+    fun getPersonData() {
         dataBaseInstance?.repoDao?.getRepos()
             ?.subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())
-            ?.subscribe ({
+            ?.subscribe({
                 if (!it.isNullOrEmpty()) {
                     lastVisitedReposList.postValue(it.asDomainModel())
                 } else {
                     lastVisitedReposList.postValue(listOf())
                 }
-            },{
+            }, {
             })?.let {
                 compositeDisposable.add(it)
             }

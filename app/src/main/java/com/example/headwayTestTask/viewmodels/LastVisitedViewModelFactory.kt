@@ -2,7 +2,6 @@ package com.example.headwayTestTask.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import java.lang.IllegalArgumentException
 
 class LastVisitedViewModelFactory : ViewModelProvider.Factory {
 

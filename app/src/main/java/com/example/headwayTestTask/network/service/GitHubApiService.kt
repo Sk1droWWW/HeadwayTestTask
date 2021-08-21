@@ -1,15 +1,12 @@
 package com.example.headwayTestTask.network.service
 
-import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.model.GitHubSearchModel
 import io.reactivex.Observable
-import okhttp3.Cache
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
-import java.io.File
 
 interface GithubApiService {
 
@@ -21,7 +18,7 @@ interface GithubApiService {
         @Query("order")     order : String = "desc",
         @Query("per_page")  perPage : Int = 15,
         @Query("page")      page: Int = 1
-    ) : Observable<GitHubSearchModel>
+    ): Observable<GitHubSearchModel>
 
     /**
      * Companion object to create the GithubApiService

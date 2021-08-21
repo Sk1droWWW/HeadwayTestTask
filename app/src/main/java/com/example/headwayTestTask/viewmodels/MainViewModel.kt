@@ -22,7 +22,7 @@ import io.reactivex.schedulers.Schedulers
 class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(),
     PagingListener<GitHubSearchItemModel> {
 
-    private val PAGE_SIZE = 30
+    private val PAGE_SIZE = 15
 
     private val compositeDisposable = CompositeDisposable()
     private val mPagingDataSourceFactory: PagingDataSourceFactory<GitHubSearchItemModel> =
@@ -77,7 +77,7 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     private fun search(): LiveData<PagedList<GitHubSearchItemModel>> {
         val config = PagedList.Config.Builder()
             .setPageSize(PAGE_SIZE)
-            .setInitialLoadSizeHint(PAGE_SIZE * 2)
+            .setInitialLoadSizeHint(PAGE_SIZE)
             .build()
 
         return LivePagedListBuilder<Int, GitHubSearchItemModel>(

@@ -19,8 +19,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.R
 import com.example.headwayTestTask.database.getDatabaseInstance
 import com.example.headwayTestTask.databinding.MainFragmentBinding
-import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.model.GitHubSearchItemModel
+import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.network.service.GithubApiService
 import com.example.headwayTestTask.repository.SearchRepositoryProvider
 import com.example.headwayTestTask.ui.adapter.GitHubSearchPagingAdapter
@@ -33,7 +33,6 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.OAuthProvider
-import io.reactivex.disposables.CompositeDisposable
 
 
 class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
@@ -45,13 +44,10 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         fun newInstance() = MainFragment()
     }
 
-//    private val mainFragmentViewModel by viewModels<MainViewModel>()
-    private lateinit var viewModelFactory: MainViewModelFactory
     private lateinit var mainFragmentViewModel: MainViewModel
 
     private lateinit var binding: MainFragmentBinding
     private lateinit var searchPagingAdapter: GitHubSearchPagingAdapter
-
 
 
     override fun onCreateView(
@@ -130,26 +126,28 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
      */
     private fun observeAuthenticationState() {
 
-        mainFragmentViewModel.authenticationState.observe(viewLifecycleOwner, Observer { authenticationState ->
-            when (authenticationState) {
-                AuthenticationState.AUTHENTICATED -> {
-                    binding.welcomeTv.text = getPersonalizationMessage()
+        mainFragmentViewModel.authenticationState.observe(
+            viewLifecycleOwner,
+            Observer { authenticationState ->
+                when (authenticationState) {
+                    AuthenticationState.AUTHENTICATED -> {
+                        binding.welcomeTv.text = getPersonalizationMessage()
 
-                    binding.loginBtn.text = getString(R.string.logout_button_text)
-                    binding.loginBtn.setOnClickListener {
-                        AuthUI.getInstance().signOut(requireContext())
+                        binding.loginBtn.text = getString(R.string.logout_button_text)
+                        binding.loginBtn.setOnClickListener {
+                            AuthUI.getInstance().signOut(requireContext())
+                        }
+                    }
+                    else -> {
+                        binding.welcomeTv.text = resources.getString(R.string.welcome_message)
+
+                        binding.loginBtn.text = getString(R.string.login_btn_text)
+                        binding.loginBtn.setOnClickListener {
+                            launchSignInFlow()
+                        }
                     }
                 }
-                else -> {
-                    binding.welcomeTv.text = resources.getString(R.string.welcome_message)
-
-                    binding.loginBtn.text = getString(R.string.login_btn_text)
-                    binding.loginBtn.setOnClickListener {
-                        launchSignInFlow()
-                    }
-                }
-            }
-        })
+            })
     }
 
     private fun observeUi() {
@@ -180,22 +178,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
             binding.searchBtn.isEnabled =
                 it.equals(AuthenticationState.AUTHENTICATED)
         })
-
-        /*mDisposable.add(
-            RxViewObservable.fromTextView(binding.searchEdt)
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .distinctUntilChanged() // prevent duplicate call with same query
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    {
-                        mainFragmentViewModel.setQuery(it)
-                    },
-                    {
-                        Log.e(TAG, it.message ?: "")
-                    }
-                )
-        )*/
     }
 
     private fun getPersonalizationMessage(): String {
@@ -224,24 +206,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
     private fun searchGitHubRepos() {
         mainFragmentViewModel.setQuery(binding.searchEdt.text.toString())
-/*
-       repository.searchGitHubRepo(binding.searchEdt.text.toString())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe(
-                { result -> populateList(result) },
-                { error ->
-                    error.printStackTrace()
-                })
-
-        val disposable = CompositeDisposable()
-        disposable.add(repository.searchGitHubRepo(binding.searchEdt.text.toString()).subscribeOn(Schedulers.io())
-            .mergeWith(repository.searchGitHubRepo(binding.searchEdt.text.toString()).subscribeOn(Schedulers.io()))
-                .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { result -> populateList(result) },
-                { error -> error.printStackTrace() }))*/
-
     }
 
     private fun openLastVisitedFragment() {
@@ -252,11 +216,11 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         val visitedFlag = "visited"
 
         try {
-            val url = repo?.htmlUrl
+            val url = repo.htmlUrl
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(url)
             startActivity(intent)
-            repo?.visitedFlag = visitedFlag
+            repo.visitedFlag = visitedFlag
 //            binding.searchResultRv.adapter.
 //            searchPagingAdapter.currentList.
             mainFragmentViewModel.saveDataIntoDb(repo.asDatabaseEntity())

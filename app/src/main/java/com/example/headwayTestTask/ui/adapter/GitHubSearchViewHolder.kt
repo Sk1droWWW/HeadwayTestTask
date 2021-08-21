@@ -11,7 +11,6 @@ class GitHubSearchViewHolder(
 
     fun bind(item: GitHubSearchItemModel) {
         binding.root.setOnClickListener { onClickListener.onRepoClick(item) }
-//        binding.repoItemClick = listener
 
         // TODO refactor to @BindingAdapters
         binding.repoName.text = when (item.name.length) {

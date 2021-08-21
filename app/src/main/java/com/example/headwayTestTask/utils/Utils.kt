@@ -25,7 +25,7 @@ fun List<DatabaseRepos>.asDomainModel(): List<GitHubSearchItemModel> {
 /**
  * Map domain entity to DatabaseVideo
  */
-fun GitHubSearchItemModel.asDatabaseEntity() : DatabaseRepos {
+fun GitHubSearchItemModel.asDatabaseEntity(): DatabaseRepos {
     return DatabaseRepos(
         name = this.name,
         fullName = this.fullName,

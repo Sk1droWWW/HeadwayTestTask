@@ -1,4 +1,4 @@
-package com.example.headwayTestTask.ui;
+package com.example.headwayTestTask.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
