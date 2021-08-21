@@ -6,30 +6,29 @@ import androidx.paging.PageKeyedDataSource
 import androidx.paging.PagedList
 import com.example.headwayTestTask.database.DatabaseRepos
 import com.example.headwayTestTask.database.ReposDatabase
-import com.example.headwayTestTask.network.NetworkStatus
+import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.model.datasource.PagingDataSourceFactory
 import com.example.headwayTestTask.model.datasource.PagingListener
-import com.example.headwayTestTask.model.GitHubSearchItemModel
-import com.example.headwayTestTask.model.GitHubSearchModel
+import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.repository.SearchRepository
 import com.example.headwayTestTask.utils.AuthenticationState
-import com.example.headwayTestTask.utils.asDomainModel
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
+private const val PAGE_SIZE = 15
+
 //TODO - Migrate to PagingSource and PagingData
 class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(),
     PagingListener<GitHubSearchItemModel> {
-
-    private val PAGE_SIZE = 15
 
     private val compositeDisposable = CompositeDisposable()
     private val mPagingDataSourceFactory: PagingDataSourceFactory<GitHubSearchItemModel> =
         PagingDataSourceFactory(this)
     val query: MutableLiveData<String> = MutableLiveData()
 
-    private var dataBaseInstance: ReposDatabase?= null
+    private var dataBaseInstance: ReposDatabase? = null
 
     val reposPagedList: LiveData<PagedList<GitHubSearchItemModel>> =
         Transformations.switchMap(Transformations.distinctUntilChanged(query)) {
@@ -52,7 +51,7 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         this.dataBaseInstance = dataBaseInstance
     }
 
-    fun saveDataIntoDb(repo: DatabaseRepos){
+    fun saveDataIntoDb(repo: DatabaseRepos) {
 
         dataBaseInstance?.repoDao?.insertRepo(repo)
             ?.subscribeOn(Schedulers.io())
@@ -77,7 +76,7 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     private fun search(): LiveData<PagedList<GitHubSearchItemModel>> {
         val config = PagedList.Config.Builder()
             .setPageSize(PAGE_SIZE)
-            .setInitialLoadSizeHint(PAGE_SIZE)
+            .setInitialLoadSizeHint(PAGE_SIZE * 2)
             .build()
 
         return LivePagedListBuilder<Int, GitHubSearchItemModel>(
@@ -89,34 +88,39 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     override fun loadInitial(
         loadInitialCallback: PageKeyedDataSource.LoadInitialCallback<Int, GitHubSearchItemModel>
     ) {
-        if (query.value.isNullOrEmpty()){
+        if (query.value.isNullOrEmpty()) {
             mNetworkStatus.postValue(NetworkStatus(NetworkStatus.ERROR, true))
             return
         }
 
         mNetworkStatus.postValue(NetworkStatus(NetworkStatus.LOADING))
         val queryParam = query.value ?: ""
-        compositeDisposable.add(
-            searchRepository.search(queryParam, 1)
-                .observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                    {
-                        if (it.isEmpty()) {
-                            mNetworkStatus
-                                .postValue(NetworkStatus(NetworkStatus.NOT_FOUND, true))
-                        } else {
-                            mNetworkStatus
-                                .postValue(NetworkStatus(NetworkStatus.SUCCESS))
-                            loadInitialCallback.onResult(it, null, 2)
-                        }
 
-                    },
-                    {
+        val firstQuery = searchRepository.search(queryParam, 1).subscribeOn(Schedulers.io())
+        val secondQuery = searchRepository.search(queryParam, 2).subscribeOn(Schedulers.io())
+
+        compositeDisposable.add(
+            Observable.zip(
+                firstQuery,
+                secondQuery,
+                { t1, t2 -> t1 + t2 }
+            ).subscribe(
+                {
+                    if (it.isEmpty()) {
                         mNetworkStatus
-                            .postValue(NetworkStatus(NetworkStatus.ERROR, true))
+                            .postValue(NetworkStatus(NetworkStatus.NOT_FOUND, true))
+                    } else {
+                        mNetworkStatus
+                            .postValue(NetworkStatus(NetworkStatus.SUCCESS))
+                        loadInitialCallback.onResult(it, null, 2)
                     }
-                )
+
+                },
+                {
+                    mNetworkStatus
+                        .postValue(NetworkStatus(NetworkStatus.ERROR, true))
+                }
+            )
         )
     }
 
@@ -125,13 +129,20 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         callback: PageKeyedDataSource.LoadCallback<Int, GitHubSearchItemModel>
     ) {
         val queryParam = query.value ?: ""
+
+        val firstQuery =
+            searchRepository.search(queryParam, params.key).subscribeOn(Schedulers.io())
+        val secondQuery =
+            searchRepository.search(queryParam, params.key + 1).subscribeOn(Schedulers.io())
+
         compositeDisposable.add(
-            searchRepository.search(queryParam, params.key)
-                .observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .subscribe {
-                    callback.onResult(it, params.key + 1)
-                }
+            Observable.zip(
+                firstQuery,
+                secondQuery,
+                { t1, t2 -> t1 + t2 }
+            ).subscribe {
+                callback.onResult(it, params.key + 2)
+            }
         )
     }
 
