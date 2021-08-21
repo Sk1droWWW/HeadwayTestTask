@@ -13,19 +13,21 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.R
-import com.example.headwayTestTask.database.asDatabaseEntity
 import com.example.headwayTestTask.database.getDatabaseInstance
 import com.example.headwayTestTask.databinding.MainFragmentBinding
 import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.network.service.GithubApiService
 import com.example.headwayTestTask.repository.SearchRepositoryProvider
-import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
+import com.example.headwayTestTask.ui.adapter.GitHubSearchPagingAdapter
 import com.example.headwayTestTask.ui.adapter.GitHubSearchViewHolder
+import com.example.headwayTestTask.utils.asDatabaseEntity
 import com.example.headwayTestTask.viewmodels.MainViewModel
+import com.example.headwayTestTask.viewmodels.MainViewModelFactory
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
@@ -43,11 +45,12 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
     }
 
 //    private val mainFragmentViewModel by viewModels<MainViewModel>()
+    private lateinit var viewModelFactory: MainViewModelFactory
     private lateinit var mainFragmentViewModel: MainViewModel
     private val mDisposable = CompositeDisposable()
 
     private lateinit var binding: MainFragmentBinding
-    private lateinit var searchAdapter: GitHubSearchAdapter
+    private lateinit var searchPagingAdapter: GitHubSearchPagingAdapter
 
 
 
@@ -69,7 +72,11 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
         val apiService = GithubApiService.create()
         val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
-        mainFragmentViewModel = MainViewModel(repository)
+//        mainFragmentViewModel = MainViewModel(repository)
+        mainFragmentViewModel = ViewModelProvider(
+            this,
+            MainViewModelFactory(repository)
+        )[MainViewModel::class.java]
 
         initDatabase()
         initReposRecyclerView()
@@ -111,9 +118,9 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
             LinearLayoutManager.VERTICAL,
             false
         )
-        searchAdapter = GitHubSearchAdapter(this)
+        searchPagingAdapter = GitHubSearchPagingAdapter(this)
         binding.searchResultRv.layoutManager = linearLayoutManager
-        binding.searchResultRv.adapter = searchAdapter
+        binding.searchResultRv.adapter = searchPagingAdapter
     }
 
     /**
@@ -146,8 +153,8 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
     }
 
     private fun observeUi() {
-        mainFragmentViewModel.userPagedList.observe(requireActivity(), Observer {
-            searchAdapter.submitList(it)
+        mainFragmentViewModel.reposPagedList.observe(requireActivity(), Observer {
+            searchPagingAdapter.submitList(it)
         })
 
         mainFragmentViewModel.networkStatus.observe(requireActivity(), Observer {
