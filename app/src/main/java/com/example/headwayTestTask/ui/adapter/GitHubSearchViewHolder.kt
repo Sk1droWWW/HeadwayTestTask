@@ -22,9 +22,9 @@ class GitHubSearchViewHolder(
             in 0..24 -> item.description
             else -> item.description?.removeRange(24, item.description.length) + "..."
         }
-        binding.repoLastUpdate.text = item.createdAt
+        binding.repoLastUpdate.text = item.updatedAt
         binding.repoLanguage.text = item.language
-        binding.repoStargazersCount.text = item.stargazers_count
+        binding.repoStargazersCount.text = item.stargazersCount
         binding.repoVisitedFlag.text = item.visitedFlag
     }
 
