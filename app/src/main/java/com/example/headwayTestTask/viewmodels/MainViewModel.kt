@@ -1,26 +1,70 @@
 package com.example.headwayTestTask.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.*
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PageKeyedDataSource
 import androidx.paging.PagedList
+import com.example.headwayTestTask.database.DatabaseRepos
+import com.example.headwayTestTask.database.ReposDatabase
 import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.model.datasource.PagingDataSourceFactory
 import com.example.headwayTestTask.model.datasource.PagingListener
 import com.example.headwayTestTask.model.GitHubSearchItemModel
-import com.example.headwayTestTask.network.service.RepoRepository
-import com.example.headwayTestTask.network.service.SearchRepository
+import com.example.headwayTestTask.repository.SearchRepository
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-
+//TODO - Migrate to PagingSource and PagingData
 class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(),
     PagingListener<GitHubSearchItemModel> {
 
     enum class AuthenticationState {
         AUTHENTICATED, UNAUTHENTICATED, INVALID_AUTHENTICATION
     }
+
+    private val compositeDisposable = CompositeDisposable()
+    private var dataBaseInstance: ReposDatabase?= null
+    fun setDatabaseInstance(dataBaseInstance: ReposDatabase) {
+        this.dataBaseInstance = dataBaseInstance
+    }
+
+    fun saveDataIntoDb(repo: DatabaseRepos){
+
+        dataBaseInstance?.repoDao?.insertRepo(repo)
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribe()?.let {
+                compositeDisposable.add(it)
+            }
+
+        dataBaseInstance?.repoDao?.del()
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribe()?.let {
+                compositeDisposable.add(it)
+            }
+
+    }
+
+    fun getPersonData(){
+
+        dataBaseInstance?.repoDao?.getRepos()
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribe ({
+                if (!it.isNullOrEmpty()) {
+//                    personsList.postValue(it)
+                } else {
+//                    personsList.postValue(listOf())
+                }
+            },{
+            })?.let {
+                compositeDisposable.add(it)
+            }
+    }
+
+
 
     private val PAGE_SIZE = 30
 
@@ -54,6 +98,9 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     }
 
     override fun onCleared() {
+        compositeDisposable.dispose()
+        compositeDisposable.clear()
+
         super.onCleared()
         mDisposable.clear()
     }

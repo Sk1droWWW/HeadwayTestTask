@@ -16,11 +16,13 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.R
+import com.example.headwayTestTask.database.asDatabaseEntity
+import com.example.headwayTestTask.database.getDatabaseInstance
 import com.example.headwayTestTask.databinding.MainFragmentBinding
 import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.network.service.GithubApiService
-import com.example.headwayTestTask.network.service.SearchRepositoryProvider
+import com.example.headwayTestTask.repository.SearchRepositoryProvider
 import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
 import com.example.headwayTestTask.ui.adapter.GitHubSearchViewHolder
 import com.example.headwayTestTask.viewmodels.MainViewModel
@@ -69,6 +71,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
         mainFragmentViewModel = MainViewModel(repository)
 
+        initDatabase()
         initReposRecyclerView()
         observeAuthenticationState()
         observeUi()
@@ -76,6 +79,11 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         binding.loginBtn.setOnClickListener { launchSignInFlow() }
         binding.searchBtn.setOnClickListener { searchGitHubRepos() }
         binding.navToLastVisitedBtn.setOnClickListener { openLastVisitedFragment() }
+    }
+
+    private fun initDatabase() {
+        val dataBaseInstance = getDatabaseInstance(requireContext())
+        mainFragmentViewModel.setDatabaseInstance(dataBaseInstance)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -244,11 +252,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
             repo?.visitedFlag = visitedFlag
             binding.searchResultRv.adapter?.notifyDataSetChanged()
 
-           /* repo?.visitedFlag = visitedFlag
-            mainFragmentViewModel.itemList.value?.indexOf(repo)?.let {
-                binding.searchResultRv
-                    .adapter?.notifyItemChanged(it)
-            }*/
+            mainFragmentViewModel.saveDataIntoDb(repo.asDatabaseEntity())
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
                 requireContext(),
