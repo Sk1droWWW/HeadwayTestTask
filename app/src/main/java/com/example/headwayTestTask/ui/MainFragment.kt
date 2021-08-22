@@ -131,7 +131,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
                 when (authenticationState) {
                     AuthenticationState.AUTHENTICATED -> {
                         binding.welcomeTv.text = getPersonalizationMessage()
-
                         binding.loginBtn.text = getString(R.string.logout_button_text)
                         binding.loginBtn.setOnClickListener {
                             AuthUI.getInstance().signOut(requireContext())
@@ -182,7 +181,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
     private fun getPersonalizationMessage(): String {
         return String.format(
             resources.getString(R.string.welcome_message) + " " +
-                    FirebaseAuth.getInstance().currentUser?.displayName,
+                    FirebaseAuth.getInstance().currentUser?.email,
         )
     }
 
