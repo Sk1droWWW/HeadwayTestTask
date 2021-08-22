@@ -6,7 +6,7 @@ import io.reactivex.Flowable
 
 @Dao
 interface RepoDao {
-    @Query("SELECT * FROM ${DatabaseRepos.TABLE_NAME}")
+    @Query("SELECT * FROM ${DatabaseRepos.TABLE_NAME} ORDER BY timeWhenAdd DESC")
     fun getRepos(): Flowable<List<DatabaseRepos>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -17,9 +17,9 @@ interface RepoDao {
 
     @Query(
         "DELETE FROM ${DatabaseRepos.TABLE_NAME} " +
-                "where id NOT IN " +
-                "(SELECT id from ${DatabaseRepos.TABLE_NAME} " +
-                "ORDER BY id DESC LIMIT ${DatabaseRepos.MAX_SIZE})"
+                "WHERE timeWhenAdd NOT IN " +
+                "(SELECT timeWhenAdd from ${DatabaseRepos.TABLE_NAME} " +
+                "ORDER BY timeWhenAdd DESC LIMIT ${DatabaseRepos.MAX_SIZE})"
     )
     fun del(): Completable
 }

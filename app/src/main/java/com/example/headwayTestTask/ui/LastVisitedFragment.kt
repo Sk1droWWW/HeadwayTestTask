@@ -10,7 +10,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.database.getDatabaseInstance
 import com.example.headwayTestTask.databinding.LastVisitedFragmentBinding
+import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
+import com.example.headwayTestTask.ui.adapter.GitHubSearchViewHolder
+import com.example.headwayTestTask.utils.asDatabaseEntity
 import com.example.headwayTestTask.viewmodels.LastVisitedViewModel
 import com.example.headwayTestTask.viewmodels.LastVisitedViewModelFactory
 
@@ -60,7 +63,13 @@ class LastVisitedFragment : Fragment() {
             false
         )
 
-        visitedPagingAdapter = GitHubSearchAdapter(MainFragment.newInstance())
+        visitedPagingAdapter = GitHubSearchAdapter(
+            object : GitHubSearchViewHolder.OnClickListener {
+                override fun onRepoClick(repo: GitHubSearchItemModel) {
+//                    viewModel.deleteRepo(repo.asDatabaseEntity())
+                }
+            }
+        )
         binding.visitedRv.layoutManager = linearLayoutManager
         binding.visitedRv.adapter = visitedPagingAdapter
     }
@@ -68,7 +77,7 @@ class LastVisitedFragment : Fragment() {
     private fun observeUi() {
         viewModel.getPersonData()
         viewModel.lastVisitedReposList.observe(requireActivity(), Observer {
-            visitedPagingAdapter.submitList(it.reversed())
+            visitedPagingAdapter.submitList(it)
         })
     }
 }

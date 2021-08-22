@@ -14,8 +14,8 @@ import androidx.room.PrimaryKey
  */
 @Entity(tableName = DatabaseRepos.TABLE_NAME)
 data class DatabaseRepos constructor(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    @PrimaryKey
+    val id: Long,
     val name: String,
     val fullName: String,
     val description: String?,
@@ -23,6 +23,7 @@ data class DatabaseRepos constructor(
     val updatedAt: String,
     val language: String,
     val stargazersCount: String,
+    val timeWhenAdd: Long,
     var visitedFlag: String
 ) {
     companion object {

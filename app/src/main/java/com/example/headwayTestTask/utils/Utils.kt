@@ -27,6 +27,7 @@ fun List<DatabaseRepos>.asDomainModel(): List<GitHubSearchItemModel> {
  */
 fun GitHubSearchItemModel.asDatabaseEntity(): DatabaseRepos {
     return DatabaseRepos(
+        id = this.id,
         name = this.name,
         fullName = this.fullName,
         description = this.description,
@@ -34,6 +35,7 @@ fun GitHubSearchItemModel.asDatabaseEntity(): DatabaseRepos {
         updatedAt = this.updatedAt,
         language = this.language,
         stargazersCount = this.stargazersCount,
+        timeWhenAdd = System.currentTimeMillis(),
         visitedFlag = this.visitedFlag
     )
 }

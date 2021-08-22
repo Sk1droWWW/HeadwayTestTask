@@ -12,6 +12,7 @@ import com.example.headwayTestTask.model.datasource.PagingListener
 import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.repository.SearchRepository
 import com.example.headwayTestTask.utils.AuthenticationState
+import com.example.headwayTestTask.utils.asDomainModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -52,21 +53,26 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     }
 
     fun saveDataIntoDb(repo: DatabaseRepos) {
+        insertRepo(repo)
+        limitDbSize()
+    }
 
-        dataBaseInstance?.repoDao?.insertRepo(repo)
-            ?.subscribeOn(Schedulers.io())
-            ?.observeOn(AndroidSchedulers.mainThread())
-            ?.subscribe()?.let {
-                compositeDisposable.add(it)
-            }
-
+    private fun limitDbSize() {
         dataBaseInstance?.repoDao?.del()
             ?.subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())
             ?.subscribe()?.let {
                 compositeDisposable.add(it)
             }
+    }
 
+    private fun insertRepo(repo: DatabaseRepos) {
+        dataBaseInstance?.repoDao?.insertRepo(repo)
+            ?.subscribeOn(Schedulers.io())
+            ?.observeOn(Schedulers.io())
+            ?.subscribe()?.let {
+                compositeDisposable.add(it)
+            }
     }
 
     fun setQuery(value: String) {
