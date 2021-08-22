@@ -68,7 +68,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
         val apiService = GithubApiService.create()
         val repository = SearchRepositoryProvider.provideSearchRepository(apiService)
-//        mainFragmentViewModel = MainViewModel(repository)
         mainFragmentViewModel = ViewModelProvider(
             this,
             MainViewModelFactory(repository)
@@ -182,7 +181,7 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
 
     private fun getPersonalizationMessage(): String {
         return String.format(
-            resources.getString(R.string.welcome_message) +
+            resources.getString(R.string.welcome_message) + " " +
                     FirebaseAuth.getInstance().currentUser?.displayName,
         )
     }
@@ -221,8 +220,13 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
             intent.data = Uri.parse(url)
             startActivity(intent)
             repo.visitedFlag = visitedFlag
-//            binding.searchResultRv.adapter.
-//            searchPagingAdapter.currentList.
+
+            searchPagingAdapter.currentList?.indexOf(repo)?.let {
+                searchPagingAdapter.notifyItemChanged(
+                    it
+                )
+            }
+
             mainFragmentViewModel.saveDataIntoDb(repo.asDatabaseEntity())
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(
