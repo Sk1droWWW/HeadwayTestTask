@@ -13,6 +13,12 @@ abstract class ReposDatabase : RoomDatabase() {
 
 private lateinit var INSTANCE: ReposDatabase
 
+/**
+ * Template function to retrieve a database instance
+ *
+ * @param context activity context
+ * @return ReposDatabase instance
+ */
 fun getDatabaseInstance(context: Context): ReposDatabase {
     synchronized(ReposDatabase::class.java) {
         if (!::INSTANCE.isInitialized) {

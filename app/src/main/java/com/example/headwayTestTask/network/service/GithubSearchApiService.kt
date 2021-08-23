@@ -11,7 +11,17 @@ import retrofit2.http.Headers
 import retrofit2.http.Query
 
 interface GithubApiService {
-
+    /**
+     * Search repositories query
+     *
+     * @param accessToken Oauth authorization token
+     * @param searchParam repository which we want to search
+     * @param sort sort option
+     * @param order sort order
+     * @param perPage number of repos per request
+     * @param page downloaded page number
+     * @return
+     */
     @GET("search/repositories")
     fun getGitHubRepos(
         @Header("Authorization") accessToken: String,

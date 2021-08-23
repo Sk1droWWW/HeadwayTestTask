@@ -102,11 +102,17 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         }
     }
 
+    /**
+     *  Init database in viewModel
+     */
     private fun initDatabase() {
         val dataBaseInstance = getDatabaseInstance(requireContext())
         mainFragmentViewModel.setDatabaseInstance(dataBaseInstance)
     }
 
+    /**
+     *  Ser ReposRecyclerView layoutManager and adapter
+     */
     private fun initReposRecyclerView() {
         val linearLayoutManager = LinearLayoutManager(
             requireContext(),
@@ -147,6 +153,9 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
             })
     }
 
+    /**
+     * Set observers for viewModel LiveData fields
+     */
     private fun observeUi() {
         mainFragmentViewModel.reposPagedList.observe(requireActivity(), Observer {
             searchPagingAdapter.submitList(it)
@@ -177,6 +186,11 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         })
     }
 
+    /**
+     * Return personalization message with greeting and user email
+     *
+     * @return String
+     */
     private fun getPersonalizationMessage(): String {
         return String.format(
             resources.getString(R.string.welcome_message) + " " +
@@ -205,14 +219,23 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         }
     }
 
+    /**
+     * Get searchEdt input and set it into viewModel liveData query param
+     */
     private fun searchGitHubRepos() {
         mainFragmentViewModel.setQuery(binding.searchEdt.text.toString())
     }
 
+    /**
+     * Navigate to LastVisitedFragment
+     */
     private fun openLastVisitedFragment() {
         findNavController().navigate(R.id.action_mainFragment_to_lastVisitedFragment)
     }
 
+    /**
+     * Opens the page in the browser with the clicked on repository
+     */
     override fun onRepoClick(repo: GitHubSearchItemModel) {
         try {
             val url = repo.htmlUrl

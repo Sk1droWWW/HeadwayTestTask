@@ -19,11 +19,18 @@ class LastVisitedViewModel : ViewModel() {
     var lastVisitedReposList: MutableLiveData<List<GitHubSearchItemModel>> =
         MutableLiveData()
 
+    /**
+     * Set Repos Database instance
+     */
     fun setDatabaseInstance(dataBaseInstance: ReposDatabase) {
         this.dataBaseInstance = dataBaseInstance
     }
 
-    fun getPersonData() {
+    /**
+     * Get rows from Repos Database and post it to LiveData
+     * that stores list of GitHubSearchItemModel
+     */
+    fun getReposData() {
         dataBaseInstance?.repoDao?.getRepos()
             ?.subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())

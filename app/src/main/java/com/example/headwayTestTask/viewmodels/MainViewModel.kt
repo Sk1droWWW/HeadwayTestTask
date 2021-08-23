@@ -19,7 +19,6 @@ import io.reactivex.schedulers.Schedulers
 
 private const val PAGE_SIZE = 15
 
-//TODO - Migrate to PagingSource and PagingData
 class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(),
     PagingListener<GitHubSearchItemModel> {
 
@@ -48,16 +47,27 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         }
     }
 
+    /**
+     * Set Repos Database instance
+     */
     fun setDatabaseInstance(dataBaseInstance: ReposDatabase) {
         this.dataBaseInstance = dataBaseInstance
     }
 
+    /**
+     * Add row to DatabaseRepos entity of Repos database, after that delete old rows
+     *
+     * @param repo DatabaseRepos object, which we want to add
+     */
     fun saveDataIntoDb(repo: DatabaseRepos) {
         insertRepo(repo)
         limitDbSize()
     }
 
-    private fun limitDbSize() {
+    /**
+     * Drops old items
+     */
+     private fun limitDbSize() {
         dataBaseInstance?.repoDao?.deleteOldRepos()
             ?.subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())
@@ -66,6 +76,11 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
             }
     }
 
+    /**
+     * Add row to DatabaseRepos entity of Repos database and
+     *
+     * @param repo DatabaseRepos object, which we add
+     */
     private fun insertRepo(repo: DatabaseRepos) {
         dataBaseInstance?.repoDao?.insertRepo(repo)
             ?.subscribeOn(Schedulers.io())
@@ -75,6 +90,11 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
             }
     }
 
+    /**
+     * Set LivaData value which represent search input string
+     *
+     * @param value search input
+     */
     fun setQuery(value: String) {
         query.postValue(value)
     }
@@ -83,6 +103,11 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         token.postValue(value ?: "")
     }
 
+    /**
+     * Init PagedList config
+     *
+     * @return LiveData list
+     */
     private fun search(): LiveData<PagedList<GitHubSearchItemModel>> {
         val config = PagedList.Config.Builder()
             .setPageSize(PAGE_SIZE)
@@ -95,6 +120,9 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         ).build()
     }
 
+    /**
+     * Load initial search response and set callback for PagedList
+     */
     override fun loadInitial(
         loadInitialCallback: PageKeyedDataSource.LoadInitialCallback<Int, GitHubSearchItemModel>
     ) {
@@ -134,6 +162,9 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         )
     }
 
+    /**
+     * Uploads following after initial search response and set callback for PagedList
+     */
     override fun loadAfter(
         params: PageKeyedDataSource.LoadParams<Int>,
         callback: PageKeyedDataSource.LoadCallback<Int, GitHubSearchItemModel>
@@ -161,6 +192,9 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         )
     }
 
+    /**
+     * Clear disposable
+     */
     override fun onCleared() {
         super.onCleared()
 

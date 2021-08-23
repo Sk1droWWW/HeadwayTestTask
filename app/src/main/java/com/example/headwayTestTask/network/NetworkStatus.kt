@@ -1,5 +1,12 @@
 package com.example.headwayTestTask.network
 
+/**
+ * Network status represented class
+ *
+ * @property status status code
+ * @property showMessage Boolean flag, which is responsible for displaying errors in the UI
+ * @property message error massage string
+ */
 data class NetworkStatus(
     var status: Int,
     var showMessage: Boolean = false,

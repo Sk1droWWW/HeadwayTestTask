@@ -50,11 +50,17 @@ class LastVisitedFragment : Fragment() {
         observeUi()
     }
 
+    /**
+     *  Init database in viewModel
+     */
     private fun initDatabase() {
         val dataBaseInstance = getDatabaseInstance(requireContext())
         viewModel.setDatabaseInstance(dataBaseInstance)
     }
 
+    /**
+     *  Ser ReposRecyclerView layoutManager and adapter
+     */
     private fun initReposRecyclerView() {
         val linearLayoutManager = LinearLayoutManager(
             requireContext(),
@@ -72,8 +78,11 @@ class LastVisitedFragment : Fragment() {
         binding.visitedRv.adapter = visitedPagingAdapter
     }
 
+    /**
+     * Set observers for viewModel LiveData fields
+     */
     private fun observeUi() {
-        viewModel.getPersonData()
+        viewModel.getReposData()
         viewModel.lastVisitedReposList.observe(requireActivity(), Observer {
             visitedPagingAdapter.submitList(it)
         })
