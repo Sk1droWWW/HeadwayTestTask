@@ -8,7 +8,7 @@ class PagingDataSourceFactory<Model : Any>(
     private val pagingListener: PagingListener<Model>
 ) : DataSource.Factory<Int, Model>() {
 
-    val pagingDataSource = MutableLiveData<PagingDataSource<Model>>()
+    private val pagingDataSource = MutableLiveData<PagingDataSource<Model>>()
 
     override fun create(): DataSource<Int, Model> {
         val dataSource = PagingDataSource(pagingListener)

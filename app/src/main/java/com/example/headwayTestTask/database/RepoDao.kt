@@ -21,5 +21,5 @@ interface RepoDao {
                 "(SELECT timeWhenAdd from ${DatabaseRepos.TABLE_NAME} " +
                 "ORDER BY timeWhenAdd DESC LIMIT ${DatabaseRepos.MAX_SIZE})"
     )
-    fun del(): Completable
+    fun deleteOldRepos(): Completable
 }

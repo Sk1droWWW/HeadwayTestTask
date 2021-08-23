@@ -11,9 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.headwayTestTask.database.getDatabaseInstance
 import com.example.headwayTestTask.databinding.LastVisitedFragmentBinding
 import com.example.headwayTestTask.model.GitHubSearchItemModel
-import com.example.headwayTestTask.ui.adapter.GitHubSearchAdapter
+import com.example.headwayTestTask.ui.adapter.GithubSearchAdapter
 import com.example.headwayTestTask.ui.adapter.GitHubSearchViewHolder
-import com.example.headwayTestTask.utils.asDatabaseEntity
 import com.example.headwayTestTask.viewmodels.LastVisitedViewModel
 import com.example.headwayTestTask.viewmodels.LastVisitedViewModelFactory
 
@@ -21,7 +20,7 @@ import com.example.headwayTestTask.viewmodels.LastVisitedViewModelFactory
 class LastVisitedFragment : Fragment() {
 
     private lateinit var binding: LastVisitedFragmentBinding
-    private lateinit var visitedPagingAdapter: GitHubSearchAdapter
+    private lateinit var visitedPagingAdapter: GithubSearchAdapter
     private lateinit var viewModel: LastVisitedViewModel
 
     override fun onCreateView(
@@ -63,10 +62,9 @@ class LastVisitedFragment : Fragment() {
             false
         )
 
-        visitedPagingAdapter = GitHubSearchAdapter(
+        visitedPagingAdapter = GithubSearchAdapter(
             object : GitHubSearchViewHolder.OnClickListener {
                 override fun onRepoClick(repo: GitHubSearchItemModel) {
-//                    viewModel.deleteRepo(repo.asDatabaseEntity())
                 }
             }
         )

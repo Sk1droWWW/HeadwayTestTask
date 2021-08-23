@@ -13,4 +13,8 @@ data class GitHubSearchItemModel(
         @SerializedName("language")         val language : String,
         @SerializedName("stargazers_count") val stargazersCount : String,
         var visitedFlag: String = ""
-)
+) {
+        companion object {
+                const val VISITED_FLAG = "visited"
+        }
+}

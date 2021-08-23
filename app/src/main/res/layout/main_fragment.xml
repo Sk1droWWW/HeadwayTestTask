@@ -77,16 +77,25 @@ xmlns:tools="http://schemas.android.com/tools">
                 android:layout_marginTop="@dimen/default_top_margin"
                 android:visibility="@{networkStatus.status == NetworkStatus.LOADING ? View.VISIBLE : View.INVISIBLE}" />
 
-            <TextView
-                android:id="@+id/text_message"
-                android:layout_width="match_parent"
+            <com.google.android.material.card.MaterialCardView
+                android:layout_marginTop="@dimen/default_top_margin"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/network_text_massage_margin"
-                android:padding="@dimen/network_text_massage_padding"
-                android:text="@{networkStatus.message}"
-                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"
                 android:visibility="@{networkStatus.showMessage ? View.VISIBLE : View.INVISIBLE}"
-                tools:text="No Result Found for xyz" />
+                >
+
+                <TextView
+                    android:id="@+id/text_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/network_text_massage_margin"
+                    android:padding="@dimen/network_text_massage_padding"
+                    android:text="@{networkStatus.message}"
+                    android:textStyle="bold"
+                    tools:text="No Result Found for xyz" />
+            </com.google.android.material.card.MaterialCardView>
+
 
         </FrameLayout>
 

@@ -5,8 +5,8 @@ import com.example.headwayTestTask.network.service.GithubApiService
 import io.reactivex.Observable
 
 class SearchRepository(private val apiService: GithubApiService) {
-    fun search(query: String, page: Int): Observable<List<GitHubSearchItemModel>> {
-        return apiService.getGitHubRepos(searchParam = query, page = page).flatMap {
+    fun search(token: String, query: String, page: Int): Observable<List<GitHubSearchItemModel>> {
+        return apiService.getGitHubRepos(token, searchParam = query, page = page).flatMap {
             Observable.just(it.items)
         }
     }

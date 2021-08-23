@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
  */
 
 /**
- * DatabaseRepos represents a video entity in the database.
+ * DatabaseRepos represents a repository entity in the database.
  */
 @Entity(tableName = DatabaseRepos.TABLE_NAME)
 data class DatabaseRepos constructor(

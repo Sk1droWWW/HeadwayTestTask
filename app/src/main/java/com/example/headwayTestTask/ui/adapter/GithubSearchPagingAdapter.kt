@@ -13,7 +13,6 @@ import com.example.headwayTestTask.model.GitHubSearchItemModel
 class GitHubSearchPagingAdapter(
     private val onClickListener: GitHubSearchViewHolder.OnClickListener
 ) :
-// TODO Replace PagedListAdapter with PagedDataAdapter
     PagedListAdapter<GitHubSearchItemModel, GitHubSearchViewHolder>
         (GitHubSearchItemDiffCallback()) {
 

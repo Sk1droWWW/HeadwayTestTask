@@ -5,7 +5,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 
-// TODO migrate to Rx..
 /**
  * This class observes the current FirebaseUser. If there is no logged in user, FirebaseUser will
  * be null.

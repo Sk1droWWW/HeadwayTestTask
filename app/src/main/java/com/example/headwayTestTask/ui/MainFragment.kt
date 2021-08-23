@@ -31,7 +31,9 @@ import com.example.headwayTestTask.viewmodels.MainViewModel
 import com.example.headwayTestTask.viewmodels.MainViewModelFactory
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.OAuthCredential
 import com.google.firebase.auth.OAuthProvider
 
 
@@ -40,8 +42,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
     companion object {
         const val TAG = "MainFragment"
         const val SIGN_IN_RESULT_CODE = 1001
-
-        fun newInstance() = MainFragment()
     }
 
     private lateinit var mainFragmentViewModel: MainViewModel
@@ -83,11 +83,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         binding.navToLastVisitedBtn.setOnClickListener { openLastVisitedFragment() }
     }
 
-    private fun initDatabase() {
-        val dataBaseInstance = getDatabaseInstance(requireContext())
-        mainFragmentViewModel.setDatabaseInstance(dataBaseInstance)
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == SIGN_IN_RESULT_CODE) {
@@ -107,6 +102,11 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         }
     }
 
+    private fun initDatabase() {
+        val dataBaseInstance = getDatabaseInstance(requireContext())
+        mainFragmentViewModel.setDatabaseInstance(dataBaseInstance)
+    }
+
     private fun initReposRecyclerView() {
         val linearLayoutManager = LinearLayoutManager(
             requireContext(),
@@ -124,7 +124,6 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
      * If there is no logged in user: show a login button
      */
     private fun observeAuthenticationState() {
-
         mainFragmentViewModel.authenticationState.observe(
             viewLifecycleOwner,
             Observer { authenticationState ->
@@ -185,12 +184,14 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
         )
     }
 
-    /** Github sign in option
+    /**
+     * Github sign in option
      */
     private fun launchSignInFlow() {
         val auth = FirebaseAuth.getInstance()
         val provider = OAuthProvider.newBuilder("github.com")
         val result = auth.pendingAuthResult
+
 
         if (result == null) {
             auth.startActivityForSignInWithProvider(
@@ -198,6 +199,8 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
                 provider.build()
             ).addOnSuccessListener {
                 binding.searchBtn.isEnabled = true
+//                val token = (it.credential as OAuthCredential).accessToken
+//                mainFragmentViewModel.setToken(token)
             }
         }
     }
@@ -211,14 +214,12 @@ class MainFragment : Fragment(), GitHubSearchViewHolder.OnClickListener {
     }
 
     override fun onRepoClick(repo: GitHubSearchItemModel) {
-        val visitedFlag = "visited"
-
         try {
             val url = repo.htmlUrl
             val intent = Intent(Intent.ACTION_VIEW)
             intent.data = Uri.parse(url)
             startActivity(intent)
-            repo.visitedFlag = visitedFlag
+            repo.visitedFlag = GitHubSearchItemModel.VISITED_FLAG
 
             searchPagingAdapter.currentList?.indexOf(repo)?.let {
                 searchPagingAdapter.notifyItemChanged(

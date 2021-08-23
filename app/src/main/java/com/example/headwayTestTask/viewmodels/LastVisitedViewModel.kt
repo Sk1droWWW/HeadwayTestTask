@@ -2,6 +2,7 @@ package com.example.headwayTestTask.viewmodels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.headwayTestTask.database.DatabaseRepos
 import com.example.headwayTestTask.database.ReposDatabase
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 import com.example.headwayTestTask.utils.asDomainModel

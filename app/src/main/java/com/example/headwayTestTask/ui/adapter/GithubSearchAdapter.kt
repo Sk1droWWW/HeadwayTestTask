@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.ListAdapter
 import com.example.headwayTestTask.databinding.RepoItemBinding
 import com.example.headwayTestTask.model.GitHubSearchItemModel
 
-class GitHubSearchAdapter(
+class GithubSearchAdapter(
     private val onClickListener: GitHubSearchViewHolder.OnClickListener
 ) :
     ListAdapter<GitHubSearchItemModel, GitHubSearchViewHolder>

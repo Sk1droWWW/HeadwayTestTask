@@ -12,7 +12,6 @@ import com.example.headwayTestTask.model.datasource.PagingListener
 import com.example.headwayTestTask.network.NetworkStatus
 import com.example.headwayTestTask.repository.SearchRepository
 import com.example.headwayTestTask.utils.AuthenticationState
-import com.example.headwayTestTask.utils.asDomainModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -28,6 +27,7 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     private val mPagingDataSourceFactory: PagingDataSourceFactory<GitHubSearchItemModel> =
         PagingDataSourceFactory(this)
     val query: MutableLiveData<String> = MutableLiveData()
+    val token: MutableLiveData<String> = MutableLiveData()
 
     private var dataBaseInstance: ReposDatabase? = null
 
@@ -58,7 +58,7 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
     }
 
     private fun limitDbSize() {
-        dataBaseInstance?.repoDao?.del()
+        dataBaseInstance?.repoDao?.deleteOldRepos()
             ?.subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())
             ?.subscribe()?.let {
@@ -77,6 +77,10 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
 
     fun setQuery(value: String) {
         query.postValue(value)
+    }
+
+    fun setToken(value: String?) {
+        token.postValue(value ?: "")
     }
 
     private fun search(): LiveData<PagedList<GitHubSearchItemModel>> {
@@ -101,16 +105,16 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
 
         mNetworkStatus.postValue(NetworkStatus(NetworkStatus.LOADING))
         val queryParam = query.value ?: ""
+        val tokenParam = token.value ?: ""
 
-        val firstQuery = searchRepository.search(queryParam, 1).subscribeOn(Schedulers.io())
-        val secondQuery = searchRepository.search(queryParam, 2).subscribeOn(Schedulers.io())
+        val firstQuery = searchRepository.search(tokenParam, queryParam, 1)
+            .subscribeOn(Schedulers.io())
+        val secondQuery = searchRepository.search(tokenParam, queryParam, 2)
+            .subscribeOn(Schedulers.io())
 
         compositeDisposable.add(
-            Observable.zip(
-                firstQuery,
-                secondQuery,
-                { t1, t2 -> t1 + t2 }
-            ).subscribe(
+            Observable.zip(firstQuery, secondQuery, { t1, t2 -> t1 + t2 })
+                .subscribe(
                 {
                     if (it.isEmpty()) {
                         mNetworkStatus
@@ -135,20 +139,25 @@ class MainViewModel(private val searchRepository: SearchRepository) : ViewModel(
         callback: PageKeyedDataSource.LoadCallback<Int, GitHubSearchItemModel>
     ) {
         val queryParam = query.value ?: ""
+        val tokenParam = token.value ?: ""
 
         val firstQuery =
-            searchRepository.search(queryParam, params.key).subscribeOn(Schedulers.io())
+            searchRepository.search(tokenParam, queryParam, params.key)
+                .subscribeOn(Schedulers.io())
         val secondQuery =
-            searchRepository.search(queryParam, params.key + 1).subscribeOn(Schedulers.io())
+            searchRepository.search(tokenParam, queryParam, params.key + 1)
+                .subscribeOn(Schedulers.io())
 
         compositeDisposable.add(
-            Observable.zip(
-                firstQuery,
-                secondQuery,
-                { t1, t2 -> t1 + t2 }
-            ).subscribe {
-                callback.onResult(it, params.key + 2)
-            }
+            Observable.zip(firstQuery, secondQuery, { t1, t2 -> t1 + t2 })
+                .subscribe (
+                    {
+                        callback.onResult(it, params.key + 2)
+                    }, {
+                        mNetworkStatus
+                            .postValue(NetworkStatus(NetworkStatus.ERROR, true))
+                    }
+                )
         )
     }
 
