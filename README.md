@@ -1,4 +1,4 @@
-# HeadwayTestTask
+# TestTask
 
 A Simple Android Mobile Application for searching Github repositories which has been implemented using Clean Architecture alongside MVVM design.
 
